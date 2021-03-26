@@ -1,3 +1,4 @@
+import com.sun.scenario.effect.Offset;
 import javafx.application.Application;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
@@ -5,7 +6,7 @@ import javafx.collections.ObservableList;
 import javafx.stage.Stage;
 
 import java.sql.*;
-import java.time.LocalTime;
+import java.time.*;
 import java.util.ArrayList;
 
 
@@ -14,10 +15,12 @@ public class Scheduler extends Application {
     private ObservableList<Customer> customers = FXCollections.observableArrayList();
     private ObservableList<User> users  = FXCollections.observableArrayList();
     private ObservableList<Contact> contacts = FXCollections.observableArrayList();
+    private User user;
 
     public static void main(String[] args) {
 
 
+        System.out.println(LocalTime.now().atOffset(ZoneOffset.UTC));
 
 
         launch(args);
@@ -33,9 +36,43 @@ public class Scheduler extends Application {
         String getCustomer = "SELECT * FROM customers";
         String getUser = "SELECT * FROM users";
         String getContacts = "SELECT * FROM contacts";
+        String getAppointments = "SELECT * FROM appointments";
 
         try( Connection con = DriverManager.getConnection( "jdbc:mysql://wgudb.ucertify.com/WJ08HlC", "U08HlC", "53689288782" );) {
             System.out.println(con);
+
+            try (var statement = con.prepareStatement(getUser)){
+
+                ResultSet results = statement.executeQuery();
+
+                while(results.next()){
+                    String name = results.getString("User_Name");
+                    int user_id = results.getInt("User_ID");
+                    String password = results.getString("Password");
+
+
+                    User user = new User(user_id,name,password);
+                    users.add(user);
+
+
+                }
+
+            }
+
+
+
+            catch(SQLException throwables){
+                throwables.printStackTrace();
+            }
+
+            for(User u : users){
+                if(u.getUsername() == "Test"){
+                    user = u;
+                }
+            }
+
+
+
             try (var statement = con.prepareStatement(getCustomer)){
 
                 ResultSet results = statement.executeQuery();
@@ -48,6 +85,7 @@ public class Scheduler extends Application {
                     int divisionID = results.getInt("Division_ID");
                     String phone = results.getString("Phone");
                     String postalCode = results.getString("Postal_Code");
+
                     int countryID;
                     String sql = "SELECT * FROM first_level_divisions WHERE Division_ID =  " + Integer.toString(divisionID);
 
@@ -79,29 +117,7 @@ public class Scheduler extends Application {
                 throwables.printStackTrace();
             }
 
-            try (var statement = con.prepareStatement(getUser)){
 
-                ResultSet results = statement.executeQuery();
-
-                while(results.next()){
-                    String name = results.getString("User_Name");
-                    int user_id = results.getInt("User_ID");
-                    String password = results.getString("Password");
-
-
-                    User user = new User(user_id,name,password);
-                    users.add(user);
-
-
-                }
-
-            }
-
-
-
-            catch(SQLException throwables){
-                throwables.printStackTrace();
-            }
 
 
             try (var statement = con.prepareStatement(getContacts)){
@@ -128,6 +144,58 @@ public class Scheduler extends Application {
                 throwables.printStackTrace();
             }
 
+            try (var statement = con.prepareStatement(getAppointments)){
+
+                ResultSet results = statement.executeQuery();
+                Customer customer = null;
+                Contact contact = null;
+                User user = null;
+                Appointment appointment = null;
+
+                while(results.next()){
+                    ZonedDateTime zonedStart =  ZonedDateTime.of(results.getTimestamp("Start").toLocalDateTime(),ZoneId.of("UTC"));
+                    LocalDateTime startTime = zonedStart.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+                    ZonedDateTime zonedEnd  =  ZonedDateTime.of(results.getTimestamp("End").toLocalDateTime(),ZoneId.of("UTC"));
+                    LocalDateTime endTime = zonedEnd.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+                    int appointmentID = results.getInt("Appointment_ID")            ;
+
+                    for(Customer c: customers){
+                        if(c.getCustomerID() == results.getInt("Customer_ID")){
+                            customer = c;
+                            break;
+                        }
+                    }
+                    for(Contact c : contacts){
+                        if(c.getContactID() == results.getInt("Contact_ID")){
+                            contact = c;
+                            break;
+                        }
+                    }
+                    for(User u : users){
+
+                        if(u.getUserID()== results.getInt("User_ID")){
+                            user = u;
+                            break;
+                        }
+                    }
+                    appointment = new Appointment(appointmentID,startTime,endTime,customer,contact,user);
+                    customer.AddAppointment(appointment);
+                    user.AddAppointment(appointment);
+                    contact.AddAppointment(appointment);
+                }
+
+
+
+            }
+
+
+
+            catch(SQLException throwables){
+                throwables.printStackTrace();
+            }
+
+
+
 
 
         } catch (SQLException throwables) {
@@ -135,6 +203,14 @@ public class Scheduler extends Application {
         }
 
 
+        for(User u : users){
+            for(Appointment a : u.getAppointments()){
+             System.out.println(a.getAppointmentID());
+                System.out.println(a.getStartTime());
+                System.out.println(a.getEndTime());
+                System.out.println(a.getCustomer().getName());
+            }
+        }
 
 
      /* // User test = new User();
@@ -158,24 +234,27 @@ public class Scheduler extends Application {
         private ObjectProperty<Customer> customer = new SimpleObjectProperty<Customer>();
         private ObjectProperty<User> user = new SimpleObjectProperty<User>();
         private ObjectProperty<Contact> contact = new SimpleObjectProperty<Contact>();
-        private ObjectProperty<LocalTime> startTime = new SimpleObjectProperty<LocalTime>();
-        private ObjectProperty<LocalTime> endTime = new SimpleObjectProperty<LocalTime>();
+        private ObjectProperty<LocalDateTime> startTime = new SimpleObjectProperty<LocalDateTime>();
+        private ObjectProperty<LocalDateTime> endTime = new SimpleObjectProperty<LocalDateTime>();
+        private ObjectProperty<LocalDate> date = new SimpleObjectProperty<LocalDate>();
         private StringProperty title = new SimpleStringProperty();
         private StringProperty description = new SimpleStringProperty();
         private StringProperty location = new SimpleStringProperty();
 
         private IntegerProperty appointmentID = new SimpleIntegerProperty();
 
-        public Appointment(LocalTime start,LocalTime end, Customer cus,Contact con,User userIn)
+        public Appointment(int appointmentID, LocalDateTime startTime, LocalDateTime endTime, Customer cus, Contact con, User userIn)
         {
-            startTime.set(start);
-            endTime.set(end);
+            this.appointmentID.set(appointmentID);
+            this.startTime.set(startTime);
+            this.endTime.set(endTime);
             customer.set(cus);
             contact.set(con);
             user.set(userIn);
             title.set("");
             description.set("");
             location.set("");
+            this.date.set(startTime.toLocalDate());
         }
 
         public Customer getCustomer() {
@@ -202,29 +281,10 @@ public class Scheduler extends Application {
             this.contact.set(contact);
         }
 
-        public LocalTime getStartTime() {
-            return startTime.get();
-        }
 
-        public ObjectProperty<LocalTime> startTimeProperty() {
-            return startTime;
-        }
 
-        public void setStartTime(LocalTime startTime) {
-            this.startTime.set(startTime);
-        }
 
-        public LocalTime getEndTime() {
-            return endTime.get();
-        }
 
-        public ObjectProperty<LocalTime> endTimeProperty() {
-            return endTime;
-        }
-
-        public void setEndTime(LocalTime endTime) {
-            this.endTime.set(endTime);
-        }
 
         public String getTitle() {
             return title.get();
@@ -256,6 +316,42 @@ public class Scheduler extends Application {
 
         public StringProperty locationProperty() {
             return location;
+        }
+
+        public LocalDateTime getStartTime() {
+            return startTime.get();
+        }
+
+        public ObjectProperty<LocalDateTime> startTimeProperty() {
+            return startTime;
+        }
+
+        public void setStartTime(LocalDateTime startTime) {
+            this.startTime.set(startTime);
+        }
+
+        public LocalDateTime getEndTime() {
+            return endTime.get();
+        }
+
+        public ObjectProperty<LocalDateTime> endTimeProperty() {
+            return endTime;
+        }
+
+        public void setEndTime(LocalDateTime endTime) {
+            this.endTime.set(endTime);
+        }
+
+        public LocalDate getDate() {
+            return date.get();
+        }
+
+        public ObjectProperty<LocalDate> dateProperty() {
+            return date;
+        }
+
+        public void setDate(LocalDate date) {
+            this.date.set(date);
         }
 
         public void setLocation(String location) {
@@ -292,7 +388,7 @@ public class Scheduler extends Application {
            for(Schedulable p : parties){
                for(Appointment a : p.getAppointments()){
                    for(LocalTime t : availTimes){
-                        if(t == a.getStartTime() || (t.isAfter(a.getStartTime()) && t.isBefore(a.getEndTime()))){
+                        if(t == a.getStartTime().toLocalTime() || (t.isAfter(a.getStartTime().toLocalTime()) && t.isBefore(a.getEndTime().toLocalTime()))){
                             removeTimes.add(t);
                         }
                    }
@@ -321,8 +417,8 @@ public class Scheduler extends Application {
                }
                for(Appointment a : p.getAppointments()){
 
-                       if(a.getStartTime().isAfter(start) && a.getStartTime().isBefore(tempEnd)){
-                           tempEnd = a.getStartTime();
+                       if(a.getStartTime().toLocalTime().isAfter(start) && a.getStartTime().toLocalTime().isBefore(tempEnd)){
+                           tempEnd = a.getStartTime().toLocalTime();
 
                    }
                }
@@ -387,6 +483,41 @@ public class Scheduler extends Application {
             this.email.set(email);
         }
 
+        public String getName() {
+            return name.get();
+        }
+
+        public StringProperty nameProperty() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name.set(name);
+        }
+
+        public String getEmail() {
+            return email.get();
+        }
+
+        public StringProperty emailProperty() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email.set(email);
+        }
+
+        public int getContactID() {
+            return contactID.get();
+        }
+
+        public IntegerProperty contactIDProperty() {
+            return contactID;
+        }
+
+        public void setContactID(int contactID) {
+            this.contactID.set(contactID);
+        }
     }
 
     public class Customer extends Schedulable{
@@ -408,6 +539,89 @@ public class Scheduler extends Application {
             this.postalCode.set(postalCode);
         }
 
+        public int getCustomerID() {
+            return customerID.get();
+        }
+
+        public IntegerProperty customerIDProperty() {
+            return customerID;
+        }
+
+        public void setCustomerID(int customerID) {
+            this.customerID.set(customerID);
+        }
+
+        public String getName() {
+            return name.get();
+        }
+
+        public StringProperty nameProperty() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name.set(name);
+        }
+
+        public String getAddress() {
+            return address.get();
+        }
+
+        public StringProperty addressProperty() {
+            return address;
+        }
+
+        public void setAddress(String address) {
+            this.address.set(address);
+        }
+
+        public int getCountryID() {
+            return countryID.get();
+        }
+
+        public IntegerProperty countryIDProperty() {
+            return countryID;
+        }
+
+        public void setCountryID(int countryID) {
+            this.countryID.set(countryID);
+        }
+
+        public int getDivisionID() {
+            return divisionID.get();
+        }
+
+        public IntegerProperty divisionIDProperty() {
+            return divisionID;
+        }
+
+        public void setDivisionID(int divisionID) {
+            this.divisionID.set(divisionID);
+        }
+
+        public String getPhone() {
+            return phone.get();
+        }
+
+        public StringProperty phoneProperty() {
+            return phone;
+        }
+
+        public void setPhone(String phone) {
+            this.phone.set(phone);
+        }
+
+        public String getPostalCode() {
+            return postalCode.get();
+        }
+
+        public StringProperty postalCodeProperty() {
+            return postalCode;
+        }
+
+        public void setPostalCode(String postalCode) {
+            this.postalCode.set(postalCode);
+        }
     }
 
     public class User extends Schedulable {
@@ -421,7 +635,29 @@ public class Scheduler extends Application {
         private String username;
         private String password;
 
+        public int getUserID() {
+            return userID;
+        }
 
+        public void setUserID(int userID) {
+            this.userID = userID;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
+        }
     }
 
 
