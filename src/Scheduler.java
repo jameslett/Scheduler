@@ -4,23 +4,19 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.stage.Stage;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.LocalTime;
 import java.util.ArrayList;
 
 
 public class Scheduler extends Application {
 
+    private ObservableList<Customer> customers = FXCollections.observableArrayList();
+    private ObservableList<User> users  = FXCollections.observableArrayList();
+    private ObservableList<Contact> contacts = FXCollections.observableArrayList();
 
     public static void main(String[] args) {
 
-        try {
-            Connection con = DriverManager.getConnection( "jdbc:mysql://wgudb.ucertify.com", "U08HlC", "53689288782" );
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
 
 
 
@@ -32,20 +28,129 @@ public class Scheduler extends Application {
 
     @Override
     public void start(Stage primaryStage){
-       User test = new User();
-       Customer cusTest = new Customer();
-       cusTest.AddAppointment(new Appointment(LocalTime.of(10,0),LocalTime.of(11,0),new Customer(),new Contact(),new User()));
+
+
+        String getCustomer = "SELECT * FROM customers";
+        String getUser = "SELECT * FROM users";
+        String getContacts = "SELECT * FROM contacts";
+
+        try( Connection con = DriverManager.getConnection( "jdbc:mysql://wgudb.ucertify.com/WJ08HlC", "U08HlC", "53689288782" );) {
+            System.out.println(con);
+            try (var statement = con.prepareStatement(getCustomer)){
+
+                ResultSet results = statement.executeQuery();
+
+                while(results.next()){
+                    String name = results.getString("Customer_Name");
+                    int customerID = results.getInt("Customer_ID");
+                    String address = results.getString("Address");
+
+                    int divisionID = results.getInt("Division_ID");
+                    String phone = results.getString("Phone");
+                    String postalCode = results.getString("Postal_Code");
+                    int countryID;
+                    String sql = "SELECT * FROM first_level_divisions WHERE Division_ID =  " + Integer.toString(divisionID);
+
+                    try(var statement2 = con.prepareStatement(sql)){
+                        ResultSet results2 = statement2.executeQuery();
+                        results2.next();
+
+
+
+
+
+                        countryID = results2.getInt("COUNTRY_ID");
+                    }
+
+
+
+                    Customer customer = new Customer(customerID,name,address,countryID,divisionID,phone,postalCode);
+                    customers.add(customer);
+
+
+                    System.out.println(name);
+                }
+
+            }
+
+
+
+            catch(SQLException throwables){
+                throwables.printStackTrace();
+            }
+
+            try (var statement = con.prepareStatement(getUser)){
+
+                ResultSet results = statement.executeQuery();
+
+                while(results.next()){
+                    String name = results.getString("User_Name");
+                    int user_id = results.getInt("User_ID");
+                    String password = results.getString("Password");
+
+
+                    User user = new User(user_id,name,password);
+                    users.add(user);
+
+
+                }
+
+            }
+
+
+
+            catch(SQLException throwables){
+                throwables.printStackTrace();
+            }
+
+
+            try (var statement = con.prepareStatement(getContacts)){
+
+                ResultSet results = statement.executeQuery();
+
+                while(results.next()){
+                    String name = results.getString("Contact_Name");
+                    int contact_id = results.getInt("Contact_ID");
+                    String email = results.getString("Email");
+
+
+                    Contact contact = new Contact(contact_id,name,email);
+                    contacts.add(contact);
+
+
+                }
+
+            }
+
+
+
+            catch(SQLException throwables){
+                throwables.printStackTrace();
+            }
+
+
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+
+
+
+
+     /* // User test = new User();
+      // Customer cusTest = new Customer();
+     //  cusTest.AddAppointment(new Appointment(LocalTime.of(10,0),LocalTime.of(11,0),new Customer(),new Contact(),new User()));
        ArrayList<Schedulable> list = new ArrayList<Schedulable>();
        list.add(test);
-       list.add(cusTest);
-        test.AddAppointment(new Appointment(LocalTime.of(9,0),LocalTime.of(10,0),new Customer(),new Contact(),new User()));
+     //  list.add(cusTest);
+      //  test.AddAppointment(new Appointment(LocalTime.of(9,0),LocalTime.of(10,0),new Customer(),new Contact(),new User()));
 
         System.out.println(test);
        ObservableList<LocalTime> times =  test.GetAvailableStartTimes(list);
        System.out.println(times);
        System.out.println(test.GetAvailableEndTimes(list,times.get(0)));
      //  System.out.println("TEST");
-
+*/
     }
 
     public class Appointment {
@@ -275,6 +380,13 @@ public class Scheduler extends Application {
         private StringProperty name = new SimpleStringProperty();
         private StringProperty email = new SimpleStringProperty();
         private IntegerProperty contactID = new SimpleIntegerProperty();
+
+        public Contact(int contactID,String name, String email){
+            this.name.set(name);
+            this.contactID.set(contactID);
+            this.email.set(email);
+        }
+
     }
 
     public class Customer extends Schedulable{
@@ -282,16 +394,27 @@ public class Scheduler extends Application {
         private StringProperty name = new SimpleStringProperty();
         private StringProperty address = new SimpleStringProperty();
         private IntegerProperty countryID = new SimpleIntegerProperty();
+        private IntegerProperty divisionID = new SimpleIntegerProperty();
         private StringProperty phone = new SimpleStringProperty();
         private StringProperty postalCode = new SimpleStringProperty();
+
+        public Customer(int customerID,String name,String address, int countryID,int divisionID, String phone, String postalCode){
+            this.customerID.set(customerID);
+            this.name.set(name);
+            this.address.set(address);
+            this.countryID.set(countryID);
+            this.divisionID.set(divisionID);
+            this.phone.set(phone);
+            this.postalCode.set(postalCode);
+        }
 
     }
 
     public class User extends Schedulable {
-        User(){
-            userID = 1;
-            username = "test";
-            password = "test";
+        User(int userID,String username,String password){
+            this.username= username;
+            this.userID = userID;
+            this.password = password;
 
         }
         private int userID;
