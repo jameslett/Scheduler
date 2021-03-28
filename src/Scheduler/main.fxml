@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+
+
+<AnchorPane prefHeight="585.0" prefWidth="785.0" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Scheduler.MainController">
+   <children>
+      <TableView fx:id="userAppointments" layoutX="3.0" layoutY="9.0" prefHeight="572.0" prefWidth="774.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <columns>
+          <TableColumn fx:id="appointmentID" prefWidth="75.0" text="Appointment ID" />
+            <TableColumn fx:id="dateColumn" prefWidth="75.0" text="Date" />
+          <TableColumn fx:id="startColumn" prefWidth="75.0" text="Start Time" />
+            <TableColumn fx:id="endColumn" prefWidth="75.0" text="End Time" />
+            <TableColumn fx:id="contactColumn" prefWidth="75.0" text="Contact" />
+            <TableColumn fx:id="customerIDColumn" prefWidth="75.0" text="Customer ID" />
+            <TableColumn fx:id="typeColumn" prefWidth="75.0" text="Type" />
+            <TableColumn fx:id="titleColumn" prefWidth="75.0" text="Title" />
+            <TableColumn fx:id="locationColumn" prefWidth="75.0" text="Location" />
+            <TableColumn fx:id="descriptionColumn" prefWidth="75.0" text="Description" />
+        </columns>
+      </TableView>
+   </children>
+</AnchorPane>

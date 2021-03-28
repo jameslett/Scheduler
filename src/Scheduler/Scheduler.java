@@ -1,10 +1,15 @@
-import com.sun.scenario.effect.Offset;
+package Scheduler;
+
 import javafx.application.Application;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.sql.*;
 import java.time.*;
 import java.util.ArrayList;
@@ -15,6 +20,15 @@ public class Scheduler extends Application {
     private ObservableList<Customer> customers = FXCollections.observableArrayList();
     private ObservableList<User> users  = FXCollections.observableArrayList();
     private ObservableList<Contact> contacts = FXCollections.observableArrayList();
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
     private User user;
 
     public static void main(String[] args) {
@@ -30,187 +44,30 @@ public class Scheduler extends Application {
 
 
     @Override
-    public void start(Stage primaryStage){
+    public void start(Stage primaryStage) throws IOException {
 
+        parseSQL();
 
-        String getCustomer = "SELECT * FROM customers";
-        String getUser = "SELECT * FROM users";
-        String getContacts = "SELECT * FROM contacts";
-        String getAppointments = "SELECT * FROM appointments";
 
-        try( Connection con = DriverManager.getConnection( "jdbc:mysql://wgudb.ucertify.com/WJ08HlC", "U08HlC", "53689288782" );) {
-            System.out.println(con);
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("main.fxml"));
+        Parent root = loader.load();
 
-            try (var statement = con.prepareStatement(getUser)){
 
-                ResultSet results = statement.executeQuery();
+        primaryStage.setTitle(user.getUsername() + "'s Appointments" );
+        primaryStage.setScene(new Scene(root));
+        primaryStage.show();
 
-                while(results.next()){
-                    String name = results.getString("User_Name");
-                    int user_id = results.getInt("User_ID");
-                    String password = results.getString("Password");
 
 
-                    User user = new User(user_id,name,password);
-                    users.add(user);
 
 
-                }
 
-            }
+        MainController controller = loader.getController();
+        controller.setMainApp(this);
 
 
 
-            catch(SQLException throwables){
-                throwables.printStackTrace();
-            }
 
-            for(User u : users){
-                if(u.getUsername() == "Test"){
-                    user = u;
-                }
-            }
-
-
-
-            try (var statement = con.prepareStatement(getCustomer)){
-
-                ResultSet results = statement.executeQuery();
-
-                while(results.next()){
-                    String name = results.getString("Customer_Name");
-                    int customerID = results.getInt("Customer_ID");
-                    String address = results.getString("Address");
-
-                    int divisionID = results.getInt("Division_ID");
-                    String phone = results.getString("Phone");
-                    String postalCode = results.getString("Postal_Code");
-
-                    int countryID;
-                    String sql = "SELECT * FROM first_level_divisions WHERE Division_ID =  " + Integer.toString(divisionID);
-
-                    try(var statement2 = con.prepareStatement(sql)){
-                        ResultSet results2 = statement2.executeQuery();
-                        results2.next();
-
-
-
-
-
-                        countryID = results2.getInt("COUNTRY_ID");
-                    }
-
-
-
-                    Customer customer = new Customer(customerID,name,address,countryID,divisionID,phone,postalCode);
-                    customers.add(customer);
-
-
-                    System.out.println(name);
-                }
-
-            }
-
-
-
-            catch(SQLException throwables){
-                throwables.printStackTrace();
-            }
-
-
-
-
-            try (var statement = con.prepareStatement(getContacts)){
-
-                ResultSet results = statement.executeQuery();
-
-                while(results.next()){
-                    String name = results.getString("Contact_Name");
-                    int contact_id = results.getInt("Contact_ID");
-                    String email = results.getString("Email");
-
-
-                    Contact contact = new Contact(contact_id,name,email);
-                    contacts.add(contact);
-
-
-                }
-
-            }
-
-
-
-            catch(SQLException throwables){
-                throwables.printStackTrace();
-            }
-
-            try (var statement = con.prepareStatement(getAppointments)){
-
-                ResultSet results = statement.executeQuery();
-                Customer customer = null;
-                Contact contact = null;
-                User user = null;
-                Appointment appointment = null;
-
-                while(results.next()){
-                    ZonedDateTime zonedStart =  ZonedDateTime.of(results.getTimestamp("Start").toLocalDateTime(),ZoneId.of("UTC"));
-                    LocalDateTime startTime = zonedStart.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-                    ZonedDateTime zonedEnd  =  ZonedDateTime.of(results.getTimestamp("End").toLocalDateTime(),ZoneId.of("UTC"));
-                    LocalDateTime endTime = zonedEnd.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-                    int appointmentID = results.getInt("Appointment_ID")            ;
-
-                    for(Customer c: customers){
-                        if(c.getCustomerID() == results.getInt("Customer_ID")){
-                            customer = c;
-                            break;
-                        }
-                    }
-                    for(Contact c : contacts){
-                        if(c.getContactID() == results.getInt("Contact_ID")){
-                            contact = c;
-                            break;
-                        }
-                    }
-                    for(User u : users){
-
-                        if(u.getUserID()== results.getInt("User_ID")){
-                            user = u;
-                            break;
-                        }
-                    }
-                    appointment = new Appointment(appointmentID,startTime,endTime,customer,contact,user);
-                    customer.AddAppointment(appointment);
-                    user.AddAppointment(appointment);
-                    contact.AddAppointment(appointment);
-                }
-
-
-
-            }
-
-
-
-            catch(SQLException throwables){
-                throwables.printStackTrace();
-            }
-
-
-
-
-
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-
-
-        for(User u : users){
-            for(Appointment a : u.getAppointments()){
-             System.out.println(a.getAppointmentID());
-                System.out.println(a.getStartTime());
-                System.out.println(a.getEndTime());
-                System.out.println(a.getCustomer().getName());
-            }
-        }
 
 
      /* // User test = new User();
@@ -231,30 +88,51 @@ public class Scheduler extends Application {
 
     public class Appointment {
 
+
         private ObjectProperty<Customer> customer = new SimpleObjectProperty<Customer>();
         private ObjectProperty<User> user = new SimpleObjectProperty<User>();
         private ObjectProperty<Contact> contact = new SimpleObjectProperty<Contact>();
-        private ObjectProperty<LocalDateTime> startTime = new SimpleObjectProperty<LocalDateTime>();
-        private ObjectProperty<LocalDateTime> endTime = new SimpleObjectProperty<LocalDateTime>();
+        private ObjectProperty<LocalTime> startTime = new SimpleObjectProperty<LocalTime>();
+        private ObjectProperty<LocalTime> endTime = new SimpleObjectProperty<LocalTime>();
         private ObjectProperty<LocalDate> date = new SimpleObjectProperty<LocalDate>();
         private StringProperty title = new SimpleStringProperty();
         private StringProperty description = new SimpleStringProperty();
         private StringProperty location = new SimpleStringProperty();
 
+
+        private StringProperty type = new SimpleStringProperty();
+
+
         private IntegerProperty appointmentID = new SimpleIntegerProperty();
 
-        public Appointment(int appointmentID, LocalDateTime startTime, LocalDateTime endTime, Customer cus, Contact con, User userIn)
+        public Appointment(int appointmentID, LocalDateTime startTime, LocalDateTime endTime, Customer cus, Contact con, User userIn,String type,String title,String description, String location)
         {
             this.appointmentID.set(appointmentID);
-            this.startTime.set(startTime);
-            this.endTime.set(endTime);
+            this.startTime.set(startTime.toLocalTime());
+            this.endTime.set(endTime.toLocalTime());
             customer.set(cus);
             contact.set(con);
             user.set(userIn);
-            title.set("");
-            description.set("");
-            location.set("");
+            this.title.set(title);
+            this.description.set(description);
+            this.location.set(location);
             this.date.set(startTime.toLocalDate());
+            this.type.set(type);
+
+        }
+
+
+
+        public String getType() {
+            return type.get();
+        }
+
+        public StringProperty typeProperty() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type.set(type);
         }
 
         public Customer getCustomer() {
@@ -318,27 +196,27 @@ public class Scheduler extends Application {
             return location;
         }
 
-        public LocalDateTime getStartTime() {
+        public LocalTime getStartTime() {
             return startTime.get();
         }
 
-        public ObjectProperty<LocalDateTime> startTimeProperty() {
+        public ObjectProperty<LocalTime> startTimeProperty() {
             return startTime;
         }
 
-        public void setStartTime(LocalDateTime startTime) {
+        public void setStartTime(LocalTime startTime) {
             this.startTime.set(startTime);
         }
 
-        public LocalDateTime getEndTime() {
+        public LocalTime getEndTime() {
             return endTime.get();
         }
 
-        public ObjectProperty<LocalDateTime> endTimeProperty() {
+        public ObjectProperty<LocalTime> endTimeProperty() {
             return endTime;
         }
 
-        public void setEndTime(LocalDateTime endTime) {
+        public void setEndTime(LocalTime endTime) {
             this.endTime.set(endTime);
         }
 
@@ -388,7 +266,7 @@ public class Scheduler extends Application {
            for(Schedulable p : parties){
                for(Appointment a : p.getAppointments()){
                    for(LocalTime t : availTimes){
-                        if(t == a.getStartTime().toLocalTime() || (t.isAfter(a.getStartTime().toLocalTime()) && t.isBefore(a.getEndTime().toLocalTime()))){
+                        if(t == a.getStartTime() || (t.isAfter(a.getStartTime()) && t.isBefore(a.getEndTime()))){
                             removeTimes.add(t);
                         }
                    }
@@ -417,8 +295,8 @@ public class Scheduler extends Application {
                }
                for(Appointment a : p.getAppointments()){
 
-                       if(a.getStartTime().toLocalTime().isAfter(start) && a.getStartTime().toLocalTime().isBefore(tempEnd)){
-                           tempEnd = a.getStartTime().toLocalTime();
+                       if(a.getStartTime().isAfter(start) && a.getStartTime().isBefore(tempEnd)){
+                           tempEnd = a.getStartTime();
 
                    }
                }
@@ -661,5 +539,190 @@ public class Scheduler extends Application {
     }
 
 
+    public void parseSQL(){
+
+
+        String getCustomer = "SELECT * FROM customers";
+        String getUser = "SELECT * FROM users";
+        String getContacts = "SELECT * FROM contacts";
+        String getAppointments = "SELECT * FROM appointments";
+
+        try( Connection con = DriverManager.getConnection( "jdbc:mysql://wgudb.ucertify.com/WJ08HlC", "U08HlC", "53689288782" );) {
+            System.out.println(con);
+
+            try (var statement = con.prepareStatement(getUser)){
+
+                ResultSet results = statement.executeQuery();
+
+                while(results.next()){
+                    String name = results.getString("User_Name");
+                    int user_id = results.getInt("User_ID");
+                    String password = results.getString("Password");
+
+
+                    User user = new User(user_id,name,password);
+                    users.add(user);
+
+
+                }
+
+            }
+
+
+
+            catch(SQLException throwables){
+                throwables.printStackTrace();
+            }
+
+            //replace with login window later
+            user = users.get(0);
+
+
+
+            try (var statement = con.prepareStatement(getCustomer)){
+
+                ResultSet results = statement.executeQuery();
+
+                while(results.next()){
+                    String name = results.getString("Customer_Name");
+                    int customerID = results.getInt("Customer_ID");
+                    String address = results.getString("Address");
+
+                    int divisionID = results.getInt("Division_ID");
+                    String phone = results.getString("Phone");
+                    String postalCode = results.getString("Postal_Code");
+
+                    int countryID;
+                    String sql = "SELECT * FROM first_level_divisions WHERE Division_ID =  " + Integer.toString(divisionID);
+
+                    try(var statement2 = con.prepareStatement(sql)){
+                        ResultSet results2 = statement2.executeQuery();
+                        results2.next();
+
+
+
+
+
+                        countryID = results2.getInt("COUNTRY_ID");
+                    }
+
+
+
+                    Customer customer = new Customer(customerID,name,address,countryID,divisionID,phone,postalCode);
+                    customers.add(customer);
+
+
+                    System.out.println(name);
+                }
+
+            }
+
+
+
+            catch(SQLException throwables){
+                throwables.printStackTrace();
+            }
+
+
+
+
+            try (var statement = con.prepareStatement(getContacts)){
+
+                ResultSet results = statement.executeQuery();
+
+                while(results.next()){
+                    String name = results.getString("Contact_Name");
+                    int contact_id = results.getInt("Contact_ID");
+                    String email = results.getString("Email");
+
+
+                    Contact contact = new Contact(contact_id,name,email);
+                    contacts.add(contact);
+
+
+                }
+
+            }
+
+
+
+            catch(SQLException throwables){
+                throwables.printStackTrace();
+            }
+
+            try (var statement = con.prepareStatement(getAppointments)){
+
+                ResultSet results = statement.executeQuery();
+                Customer customer = null;
+                Contact contact = null;
+                User user = null;
+                Appointment appointment = null;
+
+                while(results.next()){
+                    ZonedDateTime zonedStart =  ZonedDateTime.of(results.getTimestamp("Start").toLocalDateTime(),ZoneId.of("UTC"));
+                    LocalDateTime startTime = zonedStart.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+                    ZonedDateTime zonedEnd  =  ZonedDateTime.of(results.getTimestamp("End").toLocalDateTime(),ZoneId.of("UTC"));
+                    LocalDateTime endTime = zonedEnd.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+                    int appointmentID = results.getInt("Appointment_ID")            ;
+                    String type = results.getString("Type");
+                    String location = results.getString("Location");
+                    String description = results.getString("Description");
+                    String title = results.getString("Title");
+
+                    for(Customer c: customers){
+                        if(c.getCustomerID() == results.getInt("Customer_ID")){
+                            customer = c;
+                            break;
+                        }
+                    }
+                    for(Contact c : contacts){
+                        if(c.getContactID() == results.getInt("Contact_ID")){
+                            contact = c;
+                            break;
+                        }
+                    }
+                    for(User u : users){
+
+                        if(u.getUserID()== results.getInt("User_ID")){
+                            user = u;
+                            break;
+                        }
+                    }
+                    appointment = new Appointment(appointmentID,startTime,endTime,customer,contact,user,type,title,description,location);
+                    customer.AddAppointment(appointment);
+                    user.AddAppointment(appointment);
+                    contact.AddAppointment(appointment);
+                }
+
+
+
+            }
+
+
+
+            catch(SQLException throwables){
+                throwables.printStackTrace();
+            }
+
+
+
+
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+
+
+        for(User u : users){
+            for(Appointment a : u.getAppointments()){
+                System.out.println(a.getAppointmentID());
+                System.out.println(a.getStartTime());
+                System.out.println(a.getEndTime());
+                System.out.println(a.getCustomer().getName());
+            }
+        }
+
+
+    }
 
 }
