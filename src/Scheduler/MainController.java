@@ -2,13 +2,16 @@ package Scheduler;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 import java.io.IOException;
 import java.time.DayOfWeek;
@@ -21,7 +24,11 @@ public class MainController {
 
     Scheduler scheduler;
     Scheduler.Appointment selectedAppointment;
+    Scheduler.Appointment tempAppointment;
     Scheduler.Customer selectedCustomer;
+    Stage appointmentStage;
+    AddAppointmentController appointmentController;
+    int triggercount = 0;
 
 
     private Scheduler.User user;
@@ -103,6 +110,9 @@ public class MainController {
 
 
 
+
+
+
     @FXML
     private void initialize(){
 
@@ -133,7 +143,7 @@ public class MainController {
             row.setOnMouseClicked(mouseEvent -> {
                 if(!row.isEmpty() && mouseEvent.getButton() == MouseButton.PRIMARY) {
                     selectedAppointment = row.getItem();
-                    System.out.println(selectedAppointment);
+
                 }
                  else{
                     userAppointments.getSelectionModel().clearSelection();
@@ -161,6 +171,8 @@ public class MainController {
             });
             return row;
         });
+
+
 
 
 
@@ -264,23 +276,84 @@ public class MainController {
 
 
     public void showAddAppointmentWindow() {
-        Stage stage = new Stage();
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("addAppointment.fxml"));
-        Parent root = null;
-        try {
-            root = loader.load();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
+        System.out.println(appointmentStage);
+        createAppointmentStage();
+        appointmentStage.show();
+
+        appointmentController.getAppointmentIDTextField().setText(generateAppointmentID());
+        appointmentController.getAppointmentContactComboBox().setItems(scheduler.getContacts());
+        appointmentController.getAppointmentCustomerIDComboBox().setItems(scheduler.getCustomers());
+        appointmentController.getAppointmentUserIDComboBox().setItems(scheduler.getUsers());
 
 
-        stage.setTitle(user.getUsername() + "'s Appointments" );
-        stage.setScene(new Scene(root));
-        stage.show();
+
+
 
 
 
 
     }
+    public void createAppointmentStage(){
+        if(appointmentStage == null) {
+            appointmentStage = new Stage();
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("addAppointment.fxml"));
+            Parent root = null;
+            try {
+                root = loader.load();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            System.out.println(root);
 
+            appointmentController = loader.getController();
+            appointmentController.setController(this);
+            appointmentStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+                @Override
+                public void handle(WindowEvent windowEvent) {
+                appointmentController.clearFields();
+                }
+            });
+            appointmentStage.initModality(Modality.APPLICATION_MODAL);
+            appointmentStage.setTitle(user.getUsername() + "'s Appointments");
+            appointmentStage.setScene(new Scene(root));
+        }
+    }
+
+    public String generateAppointmentID(){
+
+        System.out.println(appointmentObservableList.size());
+        if(appointmentObservableList.size()>0){
+        return Integer.toString( appointmentObservableList.get(appointmentObservableList.size()-1).getAppointmentID()+1);}
+        else{
+            return "1";
+        }
+    }
+
+    public void addAppointment(Scheduler.Appointment appointment){
+        appointmentObservableList.add(appointment);
+
+    }
+
+
+    public void saveAppointment(){
+        triggercount++;
+            LocalDateTime start = LocalDateTime.of(appointmentController.getSelectedDate(), appointmentController.getStartTime());
+            LocalDateTime end = LocalDateTime.of(appointmentController.getSelectedDate(), appointmentController.getEndTime());
+            tempAppointment = new Scheduler.Appointment(appointmentController.getAppointmentID(), start, end, appointmentController.getSelectedCustomer(), appointmentController.getSelectedContact(), appointmentController.getSelectedUser(), appointmentController.getType(), appointmentController.getTitle(), appointmentController.getDescription(), appointmentController.getLocation());
+            tempAppointment.addToDB();
+            appointmentObservableList.add(tempAppointment);
+            for(Scheduler.Appointment a : appointmentObservableList){
+                System.out.println(a.getAppointmentID() + "ID" + triggercount);
+            }
+        appointmentController.clearFields();
+        appointmentStage.close();
+
+
+    }
+
+
+    public Scheduler getMainApp() {
+        return scheduler;
+    }
 }

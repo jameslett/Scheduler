@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="660.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Scheduler.MainController">
+   <children>
+      <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <MenuBar>
+              <menus>
+                <Menu mnemonicParsing="false" text="File">
+                  <items>
+                    <MenuItem mnemonicParsing="false" text="Close" />
+                  </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Edit">
+                  <items>
+                    <MenuItem mnemonicParsing="false" text="Delete" />
+                  </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Help">
+                  <items>
+                    <MenuItem mnemonicParsing="false" text="About" />
+                  </items>
+                </Menu>
+              </menus>
+            </MenuBar>
+            <TabPane prefHeight="660.0" prefWidth="800.4" tabClosingPolicy="UNAVAILABLE">
+              <tabs>
+                <Tab text="Untitled Tab 1">
+                     <content>
+                        <BorderPane>
+                           <center>
+                              <TableView fx:id="userAppointments" prefHeight="559.0" prefWidth="638.0">
+                                <columns>
+                                  <TableColumn fx:id="appointmentID" prefWidth="95.20001220703125" text="Appointment ID" />
+                                    <TableColumn fx:id="dateColumn" prefWidth="55.199981689453125" text="Date" />
+                                  <TableColumn fx:id="startColumn" prefWidth="75.0" text="Start Time" />
+                                    <TableColumn fx:id="endColumn" prefWidth="75.0" text="End Time" />
+                                    <TableColumn fx:id="contactColumn" prefWidth="75.0" text="Contact" />
+                                    <TableColumn fx:id="customerIDColumn" prefWidth="75.0" text="Customer ID" />
+                                    <TableColumn fx:id="typeColumn" prefWidth="75.0" text="Type" />
+                                    <TableColumn fx:id="titleColumn" prefWidth="75.0" text="Title" />
+                                    <TableColumn fx:id="locationColumn" prefWidth="75.0" text="Location" />
+                                    <TableColumn fx:id="descriptionColumn" prefWidth="112.0" text="Description" />
+                                </columns>
+                                 <BorderPane.margin>
+                                    <Insets />
+                                 </BorderPane.margin>
+                              </TableView>
+                           </center>
+                           <bottom>
+                              <VBox BorderPane.alignment="CENTER">
+                                 <BorderPane.margin>
+                                    <Insets />
+                                 </BorderPane.margin>
+                                 <children>
+                                    <HBox alignment="CENTER_RIGHT" prefHeight="46.0" prefWidth="800.0" spacing="30.0">
+                                       <children>
+                                          <ButtonBar prefHeight="46.0" prefWidth="676.0">
+                                            <buttons>
+                                              <Button fx:id="addAppointmentButton" mnemonicParsing="false" onAction="#onAppointmentAddClicked" prefHeight="26.0" prefWidth="192.0" text="Create Appointment" />
+                                                <Button fx:id="modifyAppointmentButton" layoutX="404.0" layoutY="20.0" mnemonicParsing="false" text="Modify Appointment" />
+                                                <Button fx:id="deleteAppointmentButton" alignment="CENTER" layoutX="404.0" layoutY="20.0" mnemonicParsing="false" onAction="#onAppointmentDeleteClicked" text="Delete Appointment" textAlignment="CENTER" />
+                                            </buttons>
+                                          </ButtonBar>
+                                          <AnchorPane prefHeight="46.0" prefWidth="105.0" />
+                                       </children>
+                                    </HBox>
+                                 </children>
+                              </VBox>
+                           </bottom>
+                           <right>
+                              <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
+                                 <children>
+                                    <Label alignment="CENTER" contentDisplay="CENTER" text="Sort by :">
+                                       <font>
+                                          <Font name="System Bold" size="18.0" />
+                                       </font>
+                                    </Label>
+                                    <RadioButton fx:id="weeklyButton" alignment="CENTER_LEFT" mnemonicParsing="false" onAction="#setWeekAppointments" text="Week">
+                                       <toggleGroup>
+                                          <ToggleGroup fx:id="sortToggle" />
+                                       </toggleGroup>
+                                    </RadioButton>
+                                    <RadioButton fx:id="monthlyButton" mnemonicParsing="false" onAction="#setMonthAppointments" text="Month" toggleGroup="$sortToggle" />
+                                    <RadioButton fx:id="allButton" mnemonicParsing="false" onAction="#setAllAppointments" selected="true" text="All" toggleGroup="$sortToggle" />
+                                 </children>
+                              </VBox>
+                           </right>
+                        </BorderPane>
+                     </content>
+                </Tab>
+                <Tab text="Untitled Tab 2">
+                     <content>
+                        <BorderPane>
+                           <center>
+                              <TableView fx:id="customerTableView" prefHeight="480.0" prefWidth="800.0" BorderPane.alignment="CENTER">
+                                <columns>
+                                  <TableColumn fx:id="customersIDColumn" prefWidth="75.0" text="Customer ID" />
+                                  <TableColumn fx:id="customersNameColumn" prefWidth="88.0" text="Name" />
+                                    <TableColumn fx:id="customersAddressColumn" minWidth="8.79998779296875" prefWidth="108.0" text="Address" />
+                                    <TableColumn fx:id="customersPostalCodeColumn" prefWidth="120.0" text="Postal Code" />
+                                    <TableColumn fx:id="customersFirstLevelColumn" prefWidth="112.0" text="First Level Division" />
+                                    <TableColumn fx:id="customersCountryColumn" minWidth="0.0" prefWidth="62.39996337890625" text="Country" />
+                                    <TableColumn fx:id="customersPhoneColumn" prefWidth="203.9998779296875" text="Phone" />
+                                </columns>
+                              </TableView>
+                           </center>
+                           <bottom>
+                              <VBox prefHeight="63.0" prefWidth="800.0" BorderPane.alignment="CENTER">
+                                 <children>
+                                    <HBox alignment="CENTER" prefHeight="46.0" prefWidth="800.0" spacing="30.0">
+                                       <children>
+                                          <ButtonBar prefHeight="46.0" prefWidth="676.0">
+                                             <buttons>
+                                                <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="192.0" text="Add Customer" />
+                                                <Button layoutX="404.0" layoutY="20.0" mnemonicParsing="false" text="Modify Customer" />
+                                                <Button alignment="CENTER" layoutX="404.0" layoutY="20.0" mnemonicParsing="false" text="Delete Customer" textAlignment="CENTER" />
+                                             </buttons>
+                                          </ButtonBar>
+                                       </children>
+                                    </HBox>
+                                 </children>
+                              </VBox>
+                           </bottom>
+                        </BorderPane>
+                     </content>
+                </Tab>
+              </tabs>
+            </TabPane>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>

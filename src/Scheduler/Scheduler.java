@@ -27,9 +27,11 @@ public class Scheduler extends Application {
     private HashMap<Integer,String> firstLevelDivisions = new HashMap<Integer, String>();
     private HashMap<Integer,String> countries = new HashMap<Integer, String>();
 
-    private User user;
+    private static User user;
 
     public static void main(String[] args) {
+
+
 
 
         System.out.println(LocalTime.now().atOffset(ZoneOffset.UTC));
@@ -73,7 +75,7 @@ public class Scheduler extends Application {
   //  appointment.deleteFromDB();
     }
 
-    public class Appointment {
+    public static class Appointment {
 
 
         private ObjectProperty<Customer> customer = new SimpleObjectProperty<Customer>();
@@ -104,6 +106,9 @@ public class Scheduler extends Application {
             this.location.set(location);
             this.date.set(startTime.toLocalDate());
             this.type.set(type);
+            cus.AddAppointment(this);
+            userIn.AddAppointment(this);
+            con.AddAppointment(this);
 
         }
 
@@ -258,7 +263,6 @@ public class Scheduler extends Application {
         public void addToDB(){
 
 
-
             String deleteAppointment = "INSERT INTO appointments(Appointment_ID,Title,Description,Location,Type,Start,End,Created_By,Customer_ID,User_ID,Contact_ID,Last_Updated_By) Values(?,?,?,?,?,?,?,?,?,?,?,?)";
 
             System.out.println(deleteAppointment);
@@ -332,20 +336,35 @@ public class Scheduler extends Application {
        }
 
 
-       public ObservableList<LocalTime> GetAvailableStartTimes(ArrayList<Schedulable> parties){
+       public ObservableList<LocalTime> GetAvailableStartTimes(ArrayList<Schedulable> parties,LocalDate date){
+
 
            ObservableList<LocalTime> availTimes = FXCollections.observableArrayList();
            ArrayList<LocalTime> removeTimes= new ArrayList<LocalTime>();
            for(LocalTime time = startTime; time.isBefore(endTime);time = time.plusMinutes(15) ){
+
+               if(date.isAfter(LocalDate.now())){
                availTimes.add(time);
-               System.out.println(time);
+               }
+               else{
+
+                   if(time.isAfter(LocalTime.now())){
+                       availTimes.add(time);
+
+                   }
+
+               }
+
            }
            for(Schedulable p : parties){
-               for(Appointment a : p.getAppointments()){
+               for(Appointment a : p.getAppointmentsByDate(date)){
                    for(LocalTime t : availTimes){
-                        if(t == a.getStartTime() || (t.isAfter(a.getStartTime()) && t.isBefore(a.getEndTime()))){
+                       //remove time if appointment conflicts
+                        if(a.getDate().equals(date) &&  (t == a.getStartTime() || (t.isAfter(a.getStartTime()) && t.isBefore(a.getEndTime())))){
                             removeTimes.add(t);
                         }
+
+
                    }
                }
 
@@ -355,14 +374,15 @@ public class Scheduler extends Application {
 
 
            }
-           System.out.println(removeTimes);
+
 
 
            return availTimes;
        }
 
-       public ObservableList<LocalTime> GetAvailableEndTimes(ArrayList<Schedulable> parties, LocalTime start)
+       public ObservableList<LocalTime> GetAvailableEndTimes(ArrayList<Schedulable> parties, LocalTime start,LocalDate date)
        {
+
 
            ObservableList<LocalTime> availTimes = FXCollections.observableArrayList();
            LocalTime tempEnd = null;
@@ -370,7 +390,7 @@ public class Scheduler extends Application {
                if(tempEnd == null){
                    tempEnd = p.getEndTime();
                }
-               for(Appointment a : p.getAppointments()){
+               for(Appointment a : p.getAppointmentsByDate(date)){
 
                        if(a.getStartTime().isAfter(start) && a.getStartTime().isBefore(tempEnd)){
                            tempEnd = a.getStartTime();
@@ -393,6 +413,21 @@ public class Scheduler extends Application {
        public ObservableList<Appointment> getAppointments() {
            return appointments;
        }
+
+       public ObservableList<Appointment> getAppointmentsByDate(LocalDate date) {
+           ObservableList<Appointment> temp = FXCollections.observableArrayList();
+
+           for(Appointment a : appointments){
+               if(a.getDate().isEqual(date)){
+                   temp.add(a);
+               }
+           }
+
+
+           return appointments;
+       }
+
+
 
        public void AddAppointment(Appointment appointment){
            appointments.add(appointment);
@@ -436,6 +471,11 @@ public class Scheduler extends Application {
             this.name.set(name);
             super.setID(contactID);
             this.email.set(email);
+        }
+
+        @Override
+        public String toString() {
+            return this.getName();
         }
 
         public String getName() {
@@ -484,6 +524,12 @@ public class Scheduler extends Application {
             this.phone.set(phone);
             this.postalCode.set(postalCode);
         }
+
+        @Override
+        public String toString() {
+            return Integer.toString(this.getID());
+        }
+
 
         public String getFirstLevelString() {
             return firstLevelString.get();
@@ -594,7 +640,10 @@ public class Scheduler extends Application {
         private String username;
         private String password;
 
-
+        @Override
+        public String toString() {
+            return Integer.toString(this.getID());
+        }
 
         public String getUsername() {
             return username;
@@ -625,7 +674,7 @@ public class Scheduler extends Application {
         String getCountries = "SELECT * FROM countries;";
 
         try( Connection con = DriverManager.getConnection( "jdbc:mysql://wgudb.ucertify.com/WJ08HlC", "U08HlC", "53689288782" );) {
-            System.out.println(con);
+
 
 
 
@@ -739,7 +788,7 @@ public class Scheduler extends Application {
                     customers.add(customer);
 
 
-                    System.out.println(name);
+
                 }
 
             }
@@ -816,9 +865,7 @@ public class Scheduler extends Application {
                         }
                     }
                     appointment = new Appointment(appointmentID,startTime,endTime,customer,contact,user,type,title,description,location);
-                    customer.AddAppointment(appointment);
-                    user.AddAppointment(appointment);
-                    contact.AddAppointment(appointment);
+
                 }
 
 
@@ -877,7 +924,7 @@ public class Scheduler extends Application {
         this.contacts = contacts;
     }
 
-    public User getUser() {
+    public static User getUser() {
         return user;
     }
 
@@ -885,7 +932,7 @@ public class Scheduler extends Application {
         this.user = user;
     }
 
-    public Timestamp convertToUTCStamp(LocalDate date,LocalTime time){
+    public static Timestamp convertToUTCStamp(LocalDate date, LocalTime time){
 
         ZonedDateTime temp = LocalDateTime.of(date,time).atZone(ZoneId.systemDefault());
         ZonedDateTime utc = temp.withZoneSameInstant(ZoneId.of("UTC"));
