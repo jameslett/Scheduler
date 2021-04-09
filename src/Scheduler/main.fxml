@@ -77,7 +77,7 @@
                                           <ButtonBar prefHeight="46.0" prefWidth="676.0">
                                             <buttons>
                                               <Button fx:id="addAppointmentButton" mnemonicParsing="false" onAction="#onAppointmentAddClicked" prefHeight="26.0" prefWidth="192.0" text="Create Appointment" />
-                                                <Button fx:id="modifyAppointmentButton" layoutX="404.0" layoutY="20.0" mnemonicParsing="false" text="Modify Appointment" />
+                                                <Button fx:id="modifyAppointmentButton" layoutX="404.0" layoutY="20.0" mnemonicParsing="false" onAction="#onAppointmentModifyClicked" text="Modify Appointment" />
                                                 <Button fx:id="deleteAppointmentButton" alignment="CENTER" layoutX="404.0" layoutY="20.0" mnemonicParsing="false" onAction="#onAppointmentDeleteClicked" text="Delete Appointment" textAlignment="CENTER" />
                                             </buttons>
                                           </ButtonBar>

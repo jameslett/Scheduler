@@ -294,8 +294,13 @@ public class Scheduler extends Application {
 
         }
 
+        public User getUser() {
+            return user.get();
+        }
 
-
+        public ObjectProperty<User> userProperty() {
+            return user;
+        }
     }
 
    public abstract class Schedulable{
@@ -336,11 +341,22 @@ public class Scheduler extends Application {
        }
 
 
-       public ObservableList<LocalTime> GetAvailableStartTimes(ArrayList<Schedulable> parties,LocalDate date){
+       public ObservableList<LocalTime> GetAvailableStartTimes(ArrayList<Schedulable> parties,LocalDate date,Appointment exclude){
 
 
            ObservableList<LocalTime> availTimes = FXCollections.observableArrayList();
            ArrayList<LocalTime> removeTimes= new ArrayList<LocalTime>();
+           ArrayList<Appointment>appointments = new ArrayList<Appointment>();
+           for(Schedulable p : parties){
+               for(Appointment a : p.getAppointmentsByDate(date)){
+                   if(!appointments.contains(a)){
+                      if(a.getAppointmentID()!= exclude.getAppointmentID()){
+                       appointments.add(a);}
+                   }
+
+               }
+           }
+
            for(LocalTime time = startTime; time.isBefore(endTime);time = time.plusMinutes(15) ){
 
                if(date.isAfter(LocalDate.now())){
@@ -356,22 +372,19 @@ public class Scheduler extends Application {
                }
 
            }
-           for(Schedulable p : parties){
-               for(Appointment a : p.getAppointmentsByDate(date)){
+
                    for(LocalTime t : availTimes){
                        //remove time if appointment conflicts
-                        if(a.getDate().equals(date) &&  (t == a.getStartTime() || (t.isAfter(a.getStartTime()) && t.isBefore(a.getEndTime())))){
-                            removeTimes.add(t);
-                        }
+                       for(Appointment a : appointments) {
+                           if ((t == a.getStartTime() || (t.isAfter(a.getStartTime()) && t.isBefore(a.getEndTime()))) && a.getDate().equals(date)) {
+                               removeTimes.add(t);
+                           }
+                       }
 
-
-                   }
-               }
-
-           for(LocalTime t : removeTimes){
-               availTimes.remove(t);
            }
 
+           for(LocalTime t : removeTimes){
+                availTimes.remove(t);
 
            }
 
@@ -380,17 +393,30 @@ public class Scheduler extends Application {
            return availTimes;
        }
 
-       public ObservableList<LocalTime> GetAvailableEndTimes(ArrayList<Schedulable> parties, LocalTime start,LocalDate date)
+       public ObservableList<LocalTime> GetAvailableEndTimes(ArrayList<Schedulable> parties, LocalTime start,LocalDate date,Appointment exclude)
        {
 
 
            ObservableList<LocalTime> availTimes = FXCollections.observableArrayList();
-           LocalTime tempEnd = null;
+           LocalTime tempEnd = parties.get(0).getEndTime();
+
+           ArrayList<Appointment>appointments = new ArrayList<Appointment>();
            for(Schedulable p : parties){
-               if(tempEnd == null){
-                   tempEnd = p.getEndTime();
-               }
                for(Appointment a : p.getAppointmentsByDate(date)){
+                   if(!appointments.contains(a)){
+                      if(a.getAppointmentID()!= exclude.getAppointmentID()){
+                       appointments.add(a);}
+                   }
+
+               }
+           }
+
+
+
+
+
+
+               for(Appointment a : appointments){
 
                        if(a.getStartTime().isAfter(start) && a.getStartTime().isBefore(tempEnd)){
                            tempEnd = a.getStartTime();
@@ -398,9 +424,10 @@ public class Scheduler extends Application {
                    }
                }
 
-           }
+
            for(LocalTime time = start.plusMinutes(15); time.isBefore(tempEnd);time = time.plusMinutes(15) ){
                availTimes.add(time);
+               System.out.println(time);
 
            }
            availTimes.add(tempEnd);

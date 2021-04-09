@@ -230,10 +230,10 @@ public class AddAppointmentController {
             alert.setContentText("Please select a time before the current time!");
 
             alert.showAndWait();
-            appointmentStartTimeComboBox.setItems(selectedUser.GetAvailableStartTimes(getPartyArrayList(),selectedDate));
+            appointmentStartTimeComboBox.setItems(selectedUser.GetAvailableStartTimes(getPartyArrayList(),selectedDate, controller.getSelectedAppointment()));
             appointmentStartTimeComboBox.getSelectionModel().select(0);
             startTime = appointmentStartTimeComboBox.getSelectionModel().getSelectedItem();
-            appointmentEndTimeComboBox.setItems(selectedUser.GetAvailableEndTimes(getPartyArrayList(),startTime,selectedDate));
+            appointmentEndTimeComboBox.setItems(selectedUser.GetAvailableEndTimes(getPartyArrayList(),startTime,selectedDate, controller.getSelectedAppointment()));
             appointmentEndTimeComboBox.getSelectionModel().select(0);
             endTime = appointmentEndTimeComboBox.getSelectionModel().getSelectedItem();
 
@@ -340,8 +340,8 @@ public class AddAppointmentController {
            selectedDate = appointmentDatePicker.getValue();
 
 
-           System.out.println(selectedUser.GetAvailableStartTimes(getPartyArrayList(), selectedDate).size());
-           if (selectedUser.GetAvailableStartTimes(getPartyArrayList(), selectedDate).size() < 1) {
+           System.out.println(selectedUser.GetAvailableStartTimes(getPartyArrayList(), selectedDate, controller.getSelectedAppointment()).size());
+           if (selectedUser.GetAvailableStartTimes(getPartyArrayList(), selectedDate, controller.getSelectedAppointment()).size() < 1) {
 
                Alert alert = new Alert(Alert.AlertType.INFORMATION);
                alert.setTitle("Information Dialog");
@@ -358,10 +358,10 @@ public class AddAppointmentController {
            } else {
 
                appointmentStartTimeComboBox.setDisable(false);
-               appointmentStartTimeComboBox.setItems(selectedUser.GetAvailableStartTimes(getPartyArrayList(), selectedDate));
+               appointmentStartTimeComboBox.setItems(selectedUser.GetAvailableStartTimes(getPartyArrayList(), selectedDate, controller.getSelectedAppointment()));
                appointmentStartTimeComboBox.getSelectionModel().select(0);
                startTime = appointmentStartTimeComboBox.getSelectionModel().getSelectedItem();
-               appointmentEndTimeComboBox.setItems(selectedUser.GetAvailableEndTimes(getPartyArrayList(), startTime, selectedDate));
+               appointmentEndTimeComboBox.setItems(selectedUser.GetAvailableEndTimes(getPartyArrayList(), startTime, selectedDate, controller.getSelectedAppointment()));
                appointmentEndTimeComboBox.getSelectionModel().select(0);
                endTime = appointmentEndTimeComboBox.getSelectionModel().getSelectedItem();
 
@@ -379,7 +379,7 @@ public class AddAppointmentController {
 
         appointmentEndTimeComboBox.setDisable(false);
         System.out.println(startTime + "THIS ONE");
-        appointmentEndTimeComboBox.setItems(selectedUser.GetAvailableEndTimes(getPartyArrayList(),startTime,selectedDate));
+        appointmentEndTimeComboBox.setItems(selectedUser.GetAvailableEndTimes(getPartyArrayList(),startTime,selectedDate, controller.getSelectedAppointment()));
         appointmentEndTimeComboBox.getSelectionModel().select(0);}
     }
 
@@ -406,14 +406,14 @@ public class AddAppointmentController {
         if(allSelected()){
 
 
-            appointmentStartTimeComboBox.setItems(selectedUser.GetAvailableStartTimes(getPartyArrayList(),selectedDate));
+            appointmentStartTimeComboBox.setItems(selectedUser.GetAvailableStartTimes(getPartyArrayList(),selectedDate,controller.getSelectedAppointment()));
 
             if(!appointmentStartTimeComboBox.getItems().contains(startTime)){
                 appointmentStartTimeComboBox.getSelectionModel().select(0);
 
             }
             startTime = appointmentStartTimeComboBox.getSelectionModel().getSelectedItem();
-            appointmentEndTimeComboBox.setItems(selectedUser.GetAvailableEndTimes(getPartyArrayList(),startTime,selectedDate));
+            appointmentEndTimeComboBox.setItems(selectedUser.GetAvailableEndTimes(getPartyArrayList(),startTime,selectedDate, controller.getSelectedAppointment()));
             appointmentEndTimeComboBox.getSelectionModel().select(0);
             endTime = appointmentEndTimeComboBox.getSelectionModel().getSelectedItem();
         }

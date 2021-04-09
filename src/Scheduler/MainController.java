@@ -22,13 +22,12 @@ import java.time.LocalTime;
 
 public class MainController {
 
-    Scheduler scheduler;
-    Scheduler.Appointment selectedAppointment;
-    Scheduler.Appointment tempAppointment;
-    Scheduler.Customer selectedCustomer;
-    Stage appointmentStage;
-    AddAppointmentController appointmentController;
-    int triggercount = 0;
+    private Scheduler scheduler;
+    private Scheduler.Appointment selectedAppointment;
+    private Scheduler.Appointment tempAppointment;
+    private Scheduler.Customer selectedCustomer;
+    private Stage appointmentStage;
+    private  AddAppointmentController appointmentController;
 
 
     private Scheduler.User user;
@@ -249,8 +248,24 @@ public class MainController {
     public void onAppointmentModifyClicked() {
 
         if (selectedAppointment != null) {
-            selectedAppointment.deleteAppointment();
-            appointmentObservableList.remove(selectedAppointment);
+            showAddAppointmentWindow();
+            appointmentController.getAppointmentIDTextField().setText(Integer.toString(selectedAppointment.getAppointmentID()));
+            appointmentController.getAppointmentTitleTextField().setText(selectedAppointment.getTitle());
+            appointmentController.getAppointmentDescriptionTextField().setText(selectedAppointment.getDescription());
+            appointmentController.getAppointmentLocationTextField().setText(selectedAppointment.getLocation());
+            appointmentController.getAppointmentTypeTextField().setText(selectedAppointment.getType());
+            appointmentController.getAppointmentUserIDComboBox().getSelectionModel().select(selectedAppointment.getUser());
+            appointmentController.getAppointmentContactComboBox().getSelectionModel().select(selectedAppointment.getContact());
+            appointmentController.getAppointmentCustomerIDComboBox().getSelectionModel().select(selectedAppointment.getCustomer());
+
+            appointmentController.getAppointmentDatePicker().setValue(selectedAppointment.getDate());
+
+            appointmentController.getAppointmentStartTimeComboBox().getSelectionModel().select(selectedAppointment.getStartTime());
+            appointmentController.getAppointmentEndTimeComboBox().getSelectionModel().select(selectedAppointment.getEndTime());
+
+
+
+
         } else {
             selectAppointmentPopup();
         }
@@ -258,6 +273,7 @@ public class MainController {
     public void onAppointmentAddClicked() {
 
         showAddAppointmentWindow();
+        selectedAppointment = null;
 
     }
 
@@ -312,6 +328,8 @@ public class MainController {
                 @Override
                 public void handle(WindowEvent windowEvent) {
                 appointmentController.clearFields();
+                selectedAppointment = null;
+
                 }
             });
             appointmentStage.initModality(Modality.APPLICATION_MODAL);
@@ -337,14 +355,14 @@ public class MainController {
 
 
     public void saveAppointment(){
-        triggercount++;
+
             LocalDateTime start = LocalDateTime.of(appointmentController.getSelectedDate(), appointmentController.getStartTime());
             LocalDateTime end = LocalDateTime.of(appointmentController.getSelectedDate(), appointmentController.getEndTime());
             tempAppointment = new Scheduler.Appointment(appointmentController.getAppointmentID(), start, end, appointmentController.getSelectedCustomer(), appointmentController.getSelectedContact(), appointmentController.getSelectedUser(), appointmentController.getType(), appointmentController.getTitle(), appointmentController.getDescription(), appointmentController.getLocation());
             tempAppointment.addToDB();
-            appointmentObservableList.add(tempAppointment);
+
             for(Scheduler.Appointment a : appointmentObservableList){
-                System.out.println(a.getAppointmentID() + "ID" + triggercount);
+
             }
         appointmentController.clearFields();
         appointmentStage.close();
@@ -355,5 +373,13 @@ public class MainController {
 
     public Scheduler getMainApp() {
         return scheduler;
+    }
+
+    public Scheduler.Appointment getSelectedAppointment() {
+        return selectedAppointment;
+    }
+
+    public void setSelectedAppointment(Scheduler.Appointment selectedAppointment) {
+        this.selectedAppointment = selectedAppointment;
     }
 }
