@@ -23,9 +23,10 @@ public class Scheduler extends Application {
     private ObservableList<User> users  = FXCollections.observableArrayList();
 
     private ObservableList<Contact> contacts = FXCollections.observableArrayList();
-
+    private ObservableList<FirstLevelDivision>divisions = FXCollections.observableArrayList();
     private HashMap<Integer,String> firstLevelDivisions = new HashMap<Integer, String>();
     private HashMap<Integer,String> countries = new HashMap<Integer, String>();
+    private HashMap<Integer,Integer> firstLevelToCountry = new HashMap<Integer,Integer>();
 
     private static User user;
 
@@ -51,7 +52,7 @@ public class Scheduler extends Application {
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("main.fxml"));
         Parent root = loader.load();
-
+        
 
         primaryStage.setTitle(user.getUsername() + "'s Appointments" );
         primaryStage.setScene(new Scene(root));
@@ -308,8 +309,15 @@ public class Scheduler extends Application {
        private IntegerProperty ID = new SimpleIntegerProperty();
        private ObservableList<Appointment> appointments = FXCollections.observableArrayList();
        private ObservableList<LocalTime> availableTimes = FXCollections.observableArrayList();
-       LocalTime startTime = LocalTime.of(8,0);
-       LocalTime endTime = LocalTime.of(22,0);
+       LocalTime startTime;
+       LocalTime endTime;
+
+       Schedulable(){
+           ZonedDateTime zonedStart =  ZonedDateTime.of(LocalDate.now(),LocalTime.of(8,0,0),ZoneId.of("US/Eastern"));
+           startTime = zonedStart.toInstant().atZone(ZoneId.systemDefault()).toLocalTime();
+           ZonedDateTime zonedEnd  =   ZonedDateTime.of(LocalDate.now(),LocalTime.of(22,0,0),ZoneId.of("US/Eastern"));
+           endTime = zonedEnd.toInstant().atZone(ZoneId.systemDefault()).toLocalTime();
+       }
 
        public int getID() {
            return ID.get();
@@ -350,7 +358,7 @@ public class Scheduler extends Application {
            for(Schedulable p : parties){
                for(Appointment a : p.getAppointmentsByDate(date)){
                    if(!appointments.contains(a)){
-                      if(a.getAppointmentID()!= exclude.getAppointmentID()){
+                      if(exclude == null || a.getAppointmentID()!= exclude.getAppointmentID()){
                        appointments.add(a);}
                    }
 
@@ -404,7 +412,7 @@ public class Scheduler extends Application {
            for(Schedulable p : parties){
                for(Appointment a : p.getAppointmentsByDate(date)){
                    if(!appointments.contains(a)){
-                      if(a.getAppointmentID()!= exclude.getAppointmentID()){
+                      if(exclude == null || a.getAppointmentID()!= exclude.getAppointmentID()){
                        appointments.add(a);}
                    }
 
@@ -733,7 +741,9 @@ public class Scheduler extends Application {
                 while(results.next()){
                     String divisionName = results.getString("Division");
                     int divisionID = results.getInt("Division_ID");
-                    firstLevelDivisions.put(divisionID,divisionName);
+                    int countryID = results.getInt("Country_ID");
+
+                    divisions.add(new FirstLevelDivision(countryID,divisionID,countries.get(countryID),divisionName));
 
 
 
@@ -967,6 +977,85 @@ public class Scheduler extends Application {
         return Timestamp.valueOf(utc.toLocalDateTime());
 
     }
+
+    public ObservableList<FirstLevelDivision> getDivisionsByCountry(String countryName) {
+        ObservableList<FirstLevelDivision> temp = FXCollections.observableArrayList();
+
+        for(FirstLevelDivision div : divisions){
+
+            if (div.getCountryName() == countryName) {
+                temp.add(div);
+            }
+        }
+
+
+        return temp;
+    }
+
+    public ObservableList<String> getCountryNames(){
+        ObservableList<String> temp = FXCollections.observableArrayList();
+        for(String s : countries.values()){
+            temp.add(s);
+        }
+
+        return temp;
+
+    }
+
+    public void setDivisions(ObservableList<FirstLevelDivision> divisions) {
+        this.divisions = divisions;
+    }
+
+    public class FirstLevelDivision  {
+
+        String CountryName;
+        String firstLevelName;
+        int countryID;
+        int firstLevelID;
+
+        FirstLevelDivision(int countryID,int firstLevelID,String countryName,String firstLevelName){
+            this.countryID = countryID;
+            this.firstLevelName = firstLevelName;
+            this.CountryName = countryName;
+            this.firstLevelID = firstLevelID;
+        }
+
+      public String toString(){
+            return firstLevelName;
+      }
+
+      public String getCountryName() {
+          return CountryName;
+      }
+
+      public void setCountryName(String countryName) {
+          CountryName = countryName;
+      }
+
+      public String getFirstLevelName() {
+          return firstLevelName;
+      }
+
+      public void setFirstLevelName(String firstLevelName) {
+          this.firstLevelName = firstLevelName;
+      }
+
+      public int getCountryID() {
+          return countryID;
+      }
+
+      public void setCountryID(int countryID) {
+          this.countryID = countryID;
+      }
+
+      public int getFirstLevelID() {
+          return firstLevelID;
+      }
+
+      public void setFirstLevelID(int firstLevelID) {
+          this.firstLevelID = firstLevelID;
+      }
+  }
 
 
 }

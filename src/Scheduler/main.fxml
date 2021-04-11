@@ -131,7 +131,7 @@
                                        <children>
                                           <ButtonBar prefHeight="46.0" prefWidth="676.0">
                                              <buttons>
-                                                <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="192.0" text="Add Customer" />
+                                                <Button fx:id="addCustomerButton" mnemonicParsing="false" onAction="#onAddCustomerClicked" prefHeight="26.0" prefWidth="192.0" text="Add Customer" />
                                                 <Button layoutX="404.0" layoutY="20.0" mnemonicParsing="false" text="Modify Customer" />
                                                 <Button alignment="CENTER" layoutX="404.0" layoutY="20.0" mnemonicParsing="false" text="Delete Customer" textAlignment="CENTER" />
                                              </buttons>

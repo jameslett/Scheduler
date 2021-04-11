@@ -27,7 +27,9 @@ public class MainController {
     private Scheduler.Appointment tempAppointment;
     private Scheduler.Customer selectedCustomer;
     private Stage appointmentStage;
+    private Stage customerStage;
     private  AddAppointmentController appointmentController;
+    private AddCustomerController customerController;
 
 
     private Scheduler.User user;
@@ -104,6 +106,8 @@ public class MainController {
     private Button modifyAppointmentButton;
     @FXML
     private Button deleteAppointmentButton;
+    @FXML
+    private Button addCustomerButton;
 
 
 
@@ -310,6 +314,18 @@ public class MainController {
 
 
     }
+
+    public void showAddCustomerWindow(){
+        createCustomerStage();
+        customerController.getCustomerCountryComboBox().setItems(scheduler.getCountryNames());
+        customerController.getCustomerCountryComboBox().getSelectionModel().select(0);
+        customerController.getCustomerFirstLevelComboBox().setItems(scheduler.getDivisionsByCountry(customerController.getCustomerCountryComboBox().getSelectionModel().getSelectedItem()));
+        customerController.getCustomerFirstLevelComboBox().getSelectionModel().select(0);
+        customerController.getCustomerIDTextField().setText(generateCustomerID());
+        customerStage.show();
+    }
+
+
     public void createAppointmentStage(){
         if(appointmentStage == null) {
             appointmentStage = new Stage();
@@ -337,6 +353,33 @@ public class MainController {
             appointmentStage.setScene(new Scene(root));
         }
     }
+    public void createCustomerStage(){
+        if(customerStage == null) {
+            customerStage = new Stage();
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("addCustomer.fxml"));
+            Parent root = null;
+            try {
+                root = loader.load();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            System.out.println(getClass().getResource("addCustomer.fxml"));
+
+            customerController = loader.getController();
+            customerController.setController(this);
+            customerStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+                @Override
+                public void handle(WindowEvent windowEvent) {
+                    customerController.clearFields();
+                    selectedCustomer = null;
+
+                }
+            });
+            customerStage.initModality(Modality.APPLICATION_MODAL);
+            customerStage.setTitle(user.getUsername() + "'s Appointments");
+        customerStage.setScene(new Scene(root));
+        }
+    }
 
     public String generateAppointmentID(){
 
@@ -348,6 +391,17 @@ public class MainController {
         }
     }
 
+    public String generateCustomerID(){
+
+
+        if(scheduler.getCustomers().size()>0){
+            return Integer.toString( scheduler.getCustomers().get(scheduler.getCustomers().size()-1).getID()+1);}
+        else{
+            return "1";
+        }
+    }
+
+
     public void addAppointment(Scheduler.Appointment appointment){
         appointmentObservableList.add(appointment);
 
@@ -355,21 +409,27 @@ public class MainController {
 
 
     public void saveAppointment(){
+        LocalDateTime start = LocalDateTime.of(appointmentController.getSelectedDate(), appointmentController.getStartTime());
+        LocalDateTime end = LocalDateTime.of(appointmentController.getSelectedDate(), appointmentController.getEndTime());
+        if(selectedAppointment != null) {
 
-            LocalDateTime start = LocalDateTime.of(appointmentController.getSelectedDate(), appointmentController.getStartTime());
-            LocalDateTime end = LocalDateTime.of(appointmentController.getSelectedDate(), appointmentController.getEndTime());
-            tempAppointment = new Scheduler.Appointment(appointmentController.getAppointmentID(), start, end, appointmentController.getSelectedCustomer(), appointmentController.getSelectedContact(), appointmentController.getSelectedUser(), appointmentController.getType(), appointmentController.getTitle(), appointmentController.getDescription(), appointmentController.getLocation());
-            tempAppointment.addToDB();
+            selectedAppointment.deleteAppointment();
+            selectedAppointment.deleteFromDB();
+            appointmentObservableList.remove(selectedAppointment);
+        }
 
-            for(Scheduler.Appointment a : appointmentObservableList){
-
-            }
+        tempAppointment = new Scheduler.Appointment(appointmentController.getAppointmentID(), start, end, appointmentController.getSelectedCustomer(), appointmentController.getSelectedContact(), appointmentController.getSelectedUser(), appointmentController.getType(), appointmentController.getTitle(), appointmentController.getDescription(), appointmentController.getLocation());
+        tempAppointment.addToDB();
         appointmentController.clearFields();
+        selectedAppointment = null;
         appointmentStage.close();
 
 
     }
 
+    public void saveCustomer(){
+
+    }
 
     public Scheduler getMainApp() {
         return scheduler;
@@ -381,5 +441,9 @@ public class MainController {
 
     public void setSelectedAppointment(Scheduler.Appointment selectedAppointment) {
         this.selectedAppointment = selectedAppointment;
+    }
+
+    public void onAddCustomerClicked(){
+        showAddCustomerWindow();
     }
 }

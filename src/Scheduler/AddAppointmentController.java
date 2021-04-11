@@ -5,6 +5,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -77,6 +78,8 @@ public class AddAppointmentController {
                 today = LocalDate.now();
             }
             setDisable(bool || date.compareTo(today) < 0 );
+            setDisable((bool || (date.getDayOfWeek() == DayOfWeek.SUNDAY || date.getDayOfWeek() == DayOfWeek.SATURDAY )));
+
         }
 
 
