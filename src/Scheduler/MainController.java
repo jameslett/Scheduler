@@ -18,6 +18,12 @@ import java.time.*;
 import java.util.Optional;
 
 
+/**
+ * The type Main controller. The required lambdas are in this classes init function.
+ * Theres two lamdas in this init function
+ * One sets the on row click for the Customer Table view and the other sets the on row click for the appointment
+ * Tableview. They're needed so that I can store a reference to each of these items to either delete or modify the selected row.
+ */
 public class MainController {
 
     private Scheduler scheduler;
@@ -55,8 +61,9 @@ public class MainController {
     @FXML
     private TableColumn<Scheduler.Appointment,String> typeColumn;
 
+
     @FXML
-    TableColumn<Scheduler.Appointment, LocalTime> startColumn;
+    private TableColumn<Scheduler.Appointment, LocalTime> startColumn;
 
     @FXML
     private TableColumn<Scheduler.Appointment, LocalTime> endColumn;
@@ -107,15 +114,18 @@ public class MainController {
     private Button deleteAppointmentButton;
     @FXML
     private Button addCustomerButton;
-    @FXML TextArea reportArea = new TextArea();
 
-
-
-
+    @FXML
+    private TextArea reportArea = new TextArea();
 
 
 
     @FXML
+    /**
+     * Theres two lamdas in this init function
+     * One sets the on row click for the Customer Table view and the other sets the on row click for the appointment
+     * Tableview. They're needed so that I can store a reference to each of these items to either delete or modify the selected row.
+     */
     private void initialize(){
 
         //appointments tableview setup
@@ -182,6 +192,11 @@ public class MainController {
     }
 
 
+    /**
+     * Sets main app.
+     *
+     * @param scheduler the scheduler
+     */
     public void setMainApp(Scheduler scheduler) {
         this.scheduler = scheduler;
 
@@ -193,10 +208,16 @@ public class MainController {
 
     }
 
+    /**
+     * Set sort to all appointments.
+     */
     public void setAllAppointments(){
         userAppointments.setItems(appointmentObservableList);
     }
 
+    /**
+     * Set sort to month appointments.
+     */
     public void setMonthAppointments(){
 
         ObservableList<Scheduler.Appointment> temp = FXCollections.observableArrayList();
@@ -211,6 +232,9 @@ public class MainController {
 
     }
 
+    /**
+     * Set sort to week appointments.
+     */
     public void setWeekAppointments(){
 
         LocalDate monday = LocalDate.now();
@@ -238,6 +262,9 @@ public class MainController {
 
     }
 
+    /**
+     * On appointment delete clicked. Handles what happens when the appointment delete button is clicked.
+     */
     public void onAppointmentDeleteClicked() {
 
         if (selectedAppointment != null) {
@@ -258,6 +285,9 @@ public class MainController {
         }
     }
 
+    /**
+     * On customer delete clicked. Handles what happens when customer delete is clicked
+     */
     public void onCustomerDeleteClicked() {
 
 
@@ -292,6 +322,9 @@ public class MainController {
         }
     }
 
+    /**
+     * On appointment modify clicked.Handles what happens when appointment modify is clicked
+     */
     public void onAppointmentModifyClicked() {
 
         if (selectedAppointment != null) {
@@ -318,6 +351,9 @@ public class MainController {
         }
     }
 
+    /**
+     * On customer modify clicked.Handles what happens when customer modify is clicked
+     */
     public void onCustomerModifyClicked() {
 
         if (selectedCustomer != null) {
@@ -336,6 +372,10 @@ public class MainController {
             selectCustomerPopup();
         }
     }
+
+    /**
+     * On appointment add clicked.Handles appointment add click
+     */
     public void onAppointmentAddClicked() {
 
         showAddAppointmentWindow();
@@ -344,9 +384,9 @@ public class MainController {
     }
 
 
-
-
-
+    /**
+     * Select appointment popup. Informs user to select appointment
+     */
     public void selectAppointmentPopup(){
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Information Dialog");
@@ -356,6 +396,9 @@ public class MainController {
         alert.showAndWait();
         }
 
+    /**
+     * Select customer popup.Informs user to select a customer
+     */
     public void selectCustomerPopup(){
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Information Dialog");
@@ -366,7 +409,9 @@ public class MainController {
     }
 
 
-
+    /**
+     * Show add appointment window.
+     */
     public void showAddAppointmentWindow() {
 
         System.out.println(appointmentStage);
@@ -387,6 +432,9 @@ public class MainController {
 
     }
 
+    /**
+     * Show add customer window.
+     */
     public void showAddCustomerWindow(){
         createCustomerStage();
         customerController.getCustomerCountryComboBox().setItems(scheduler.getCountryNames());
@@ -398,6 +446,9 @@ public class MainController {
     }
 
 
+    /**
+     * Create appointment stage.
+     */
     public void createAppointmentStage(){
         if(appointmentStage == null) {
             appointmentStage = new Stage();
@@ -425,6 +476,10 @@ public class MainController {
             appointmentStage.setScene(new Scene(root));
         }
     }
+
+    /**
+     * Create customer stage.
+     */
     public void createCustomerStage(){
         if(customerStage == null) {
             customerStage = new Stage();
@@ -453,6 +508,11 @@ public class MainController {
         }
     }
 
+    /**
+     * Generate appointment id string.
+     *
+     * @return the string
+     */
     public String generateAppointmentID(){
 
         System.out.println(appointmentObservableList.size());
@@ -463,6 +523,11 @@ public class MainController {
         }
     }
 
+    /**
+     * Generate customer id string.
+     *
+     * @return the string
+     */
     public String generateCustomerID(){
 
 
@@ -474,12 +539,20 @@ public class MainController {
     }
 
 
+    /**
+     * Add appointment.
+     *
+     * @param appointment the appointment
+     */
     public void addAppointment(Scheduler.Appointment appointment){
         appointmentObservableList.add(appointment);
 
     }
 
 
+    /**
+     * Save appointment.
+     */
     public void saveAppointment(){
         LocalDateTime start = LocalDateTime.of(appointmentController.getSelectedDate(), appointmentController.getStartTime());
         LocalDateTime end = LocalDateTime.of(appointmentController.getSelectedDate(), appointmentController.getEndTime());
@@ -500,7 +573,9 @@ public class MainController {
     }
 
 
-
+    /**
+     * Save customer.
+     */
     public void saveCustomer(){
 
 
@@ -527,29 +602,61 @@ public class MainController {
 
     }
 
+    /**
+     * Gets main app.
+     *
+     * @return the main app
+     */
     public Scheduler getMainApp() {
         return scheduler;
     }
 
+    /**
+     * Gets selected appointment.
+     *
+     * @return the selected appointment
+     */
     public Scheduler.Appointment getSelectedAppointment() {
         return selectedAppointment;
     }
 
+    /**
+     * Sets selected appointment.
+     *
+     * @param selectedAppointment the selected appointment
+     */
     public void setSelectedAppointment(Scheduler.Appointment selectedAppointment) {
         this.selectedAppointment = selectedAppointment;
     }
 
+    /**
+     * On add customer clicked.
+     */
     public void onAddCustomerClicked(){
         showAddCustomerWindow();
     }
 
+    /**
+     * Gets appointment observable list.
+     *
+     * @return the appointment observable list
+     */
     public ObservableList<Scheduler.Appointment> getAppointmentObservableList() {
         return appointmentObservableList;
     }
 
+    /**
+     * Sets appointment observable list.
+     *
+     * @param appointmentObservableList the appointment observable list
+     */
     public void setAppointmentObservableList(ObservableList<Scheduler.Appointment> appointmentObservableList) {
         this.appointmentObservableList = appointmentObservableList;
     }
+
+    /**
+     * On report tab.
+     */
     public void onReportTab(){
         reportArea.clear();
         reportArea.appendText("Appointments By month and type :\n");
@@ -575,6 +682,12 @@ public class MainController {
         reportArea.appendText("Report 3 Total Number of appointments :\n" + getAppointmentObservableList().size());
 
     }
+
+    /**
+     * Get types observable list.
+     *
+     * @return the observable list
+     */
     public ObservableList<String> getTypes(){
         ObservableList<String> temp = FXCollections.observableArrayList();
 
@@ -586,6 +699,11 @@ public class MainController {
         return temp;
     }
 
+    /**
+     * Gets months.
+     *
+     * @return the months
+     */
     public ObservableList<Month> getMonths() {
         ObservableList<Month> temp = FXCollections.observableArrayList();
 
@@ -598,6 +716,13 @@ public class MainController {
         return temp;
     }
 
+    /**
+     * Gets number of appointments by month and type.
+     *
+     * @param month the month
+     * @param type  the type
+     * @return the number of appointments by month and type
+     */
     public int getNumberOfAppointmentsByMonthAndType(Month month,String type) {
 
         int temp = 0;

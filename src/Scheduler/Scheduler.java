@@ -21,6 +21,9 @@ import java.time.*;
 import java.util.*;
 
 
+/**
+ * The type Scheduler.
+ */
 public class Scheduler extends Application {
 
     private ObservableList<Customer> customers = FXCollections.observableArrayList();
@@ -31,17 +34,24 @@ public class Scheduler extends Application {
     private HashMap<Integer,String> firstLevelDivisions = new HashMap<Integer, String>();
     private HashMap<Integer,String> countries = new HashMap<Integer, String>();
     private HashMap<Integer,Integer> firstLevelToCountry = new HashMap<Integer,Integer>();
-    static Stage loginStage = new Stage();
-    static ResourceBundle resourceBundle;
+
+    private static Stage loginStage = new Stage();
+
+    private static ResourceBundle resourceBundle;
     private static User user;
-    MainController controller;
+    private  MainController controller;
     @FXML
     private Button login = new Button();
     @FXML
-    TextField userName = new TextField();
+    private TextField userName = new TextField();
     @FXML
-    PasswordField passwordField = new PasswordField();
+    private PasswordField passwordField = new PasswordField();
 
+    /**
+     * The entry point of application.
+     *
+     * @param args the input arguments
+     */
     public static void main(String[] args) {
 
 
@@ -54,7 +64,6 @@ public class Scheduler extends Application {
 
 
     }
-
 
     @Override
     public void start(Stage primaryStage) throws IOException {
@@ -140,6 +149,9 @@ public class Scheduler extends Application {
 
     }
 
+    /**
+     * The appointment Class Contains all appointment info
+     */
     public static class Appointment {
 
 
@@ -159,6 +171,21 @@ public class Scheduler extends Application {
 
         private IntegerProperty appointmentID = new SimpleIntegerProperty();
 
+
+        /**
+         * Instantiates a new Appointment.
+         *
+         * @param appointmentID the appointment id
+         * @param startTime     the start time
+         * @param endTime       the end time
+         * @param cus           the customer
+         * @param con           the contact
+         * @param userIn        the user in
+         * @param type          the type
+         * @param title         the title
+         * @param description   the description
+         * @param location      the location
+         */
         public Appointment(int appointmentID, LocalDateTime startTime, LocalDateTime endTime, Customer cus, Contact con, User userIn,String type,String title,String description, String location)
         {
             this.appointmentID.set(appointmentID);
@@ -179,148 +206,307 @@ public class Scheduler extends Application {
 
         }
 
+
+        /**
+         * Gets start date time.
+         *
+         * @return the start date time
+         */
         public LocalDateTime getStartDateTime() {
             return startDateTime.get();
         }
 
-        public ObjectProperty<LocalDateTime> startDateTimeProperty() {
-            return startDateTime;
-        }
 
-        public void setStartDateTime(LocalDateTime startDateTime) {
-            this.startDateTime.set(startDateTime);
-        }
-
+        /**
+         * Gets type.
+         *
+         * @return the type
+         */
         public String getType() {
             return type.get();
         }
 
+
+        /**
+         * Type property string property.
+         *
+         * @return the string property
+         */
         public StringProperty typeProperty() {
             return type;
         }
 
+
+        /**
+         * Sets type.
+         *
+         * @param type the type
+         */
         public void setType(String type) {
             this.type.set(type);
         }
 
+
+        /**
+         * Gets customer.
+         *
+         * @return the customer
+         */
         public Customer getCustomer() {
             return customer.get();
         }
 
+
+        /**
+         * Customer property object property.
+         *
+         * @return the object property
+         */
         public ObjectProperty<Customer> customerProperty() {
             return customer;
         }
 
+        /**
+         * Sets customer.
+         *
+         * @param customer the customer
+         */
         public void setCustomer(Customer customer) {
             this.customer.set(customer);
         }
 
+
+        /**
+         * Gets contact.
+         *
+         * @return the contact
+         */
         public Contact getContact() {
             return contact.get();
         }
 
+
+        /**
+         * Contact property object property.
+         *
+         * @return the object property
+         */
         public ObjectProperty<Contact> contactProperty() {
             return contact;
         }
 
+
+        /**
+         * Sets contact.
+         *
+         * @param contact the contact
+         */
         public void setContact(Contact contact) {
             this.contact.set(contact);
         }
 
 
-
-
-
-
+        /**
+         * Gets title.
+         *
+         * @return the appointment title string
+         */
         public String getTitle() {
             return title.get();
         }
 
+        /**
+         * Title property string property.
+         *
+         * @return the appointment title property
+         */
         public StringProperty titleProperty() {
             return title;
         }
 
+        /**
+         * sets the appointment title
+         *
+         * @param title the title to be set
+         */
         public void setTitle(String title) {
             this.title.set(title);
         }
 
+        /**
+         * Gets description.
+         *
+         * @return the appointment description
+         */
         public String getDescription() {
             return description.get();
         }
 
+        /**
+         * Description property string property.
+         *
+         * @return the appointment description property
+         */
         public StringProperty descriptionProperty() {
             return description;
         }
 
+        /**
+         * sets the appointment description
+         *
+         * @param description the description to set
+         */
         public void setDescription(String description) {
             this.description.set(description);
         }
 
+        /**
+         * Gets location.
+         *
+         * @return the location location string
+         */
         public String getLocation() {
             return location.get();
         }
 
+        /**
+         * Location property string property.
+         *
+         * @return the appointment location property
+         */
         public StringProperty locationProperty() {
             return location;
         }
 
+        /**
+         * Gets start time.
+         *
+         * @return the start time
+         */
         public LocalTime getStartTime() {
             return startTime.get();
         }
 
+        /**
+         * Start time property object property.
+         *
+         * @return the object property
+         */
         public ObjectProperty<LocalTime> startTimeProperty() {
             return startTime;
         }
 
+        /**
+         * Sets start time.
+         *
+         * @param startTime the start time
+         */
         public void setStartTime(LocalTime startTime) {
             this.startTime.set(startTime);
         }
 
+        /**
+         * Gets end time.
+         *
+         * @return the end time
+         */
         public LocalTime getEndTime() {
             return endTime.get();
         }
 
+        /**
+         * End time property object property.
+         *
+         * @return the object property
+         */
         public ObjectProperty<LocalTime> endTimeProperty() {
             return endTime;
         }
 
+        /**
+         * Sets end time.
+         *
+         * @param endTime the end time
+         */
         public void setEndTime(LocalTime endTime) {
             this.endTime.set(endTime);
         }
 
+        /**
+         * Gets date.
+         *
+         * @return the date
+         */
         public LocalDate getDate() {
             return date.get();
         }
 
+        /**
+         * Date property object property.
+         *
+         * @return the object property
+         */
         public ObjectProperty<LocalDate> dateProperty() {
             return date;
         }
 
+        /**
+         * Sets date.
+         *
+         * @param date the date
+         */
         public void setDate(LocalDate date) {
             this.date.set(date);
         }
 
+        /**
+         * Sets location.
+         *
+         * @param location the location
+         */
         public void setLocation(String location) {
             this.location.set(location);
         }
 
+        /**
+         * Gets appointment id.
+         *
+         * @return the appointment id
+         */
         public int getAppointmentID() {
             return appointmentID.get();
         }
 
+        /**
+         * Appointment id property integer property.
+         *
+         * @return the integer property
+         */
         public IntegerProperty appointmentIDProperty() {
             return appointmentID;
         }
 
+        /**
+         * Sets appointment id.
+         *
+         * @param appointmentID the appointment id
+         */
         public void setAppointmentID(int appointmentID) {
             this.appointmentID.set(appointmentID);
         }
 
+        /**
+         * Delete appointment.
+         */
         public void deleteAppointment(){
             customer.get().getAppointments().remove(this);
             contact.get().getAppointments().remove(this);
             customer.get().getAppointments().remove(this);
         }
+
+        /**
+         * Delete from db.
+         */
         public void deleteFromDB(){
 
             String deleteAppointment = "DELETE FROM appointments WHERE Appointment_ID =" + appointmentID.get();
@@ -337,6 +523,10 @@ public class Scheduler extends Application {
 
 
         }
+
+        /**
+         * Add to db.
+         */
         public void addToDB(){
 
 
@@ -371,43 +561,83 @@ public class Scheduler extends Application {
 
         }
 
+        /**
+         * Gets user.
+         *
+         * @return the user
+         */
         public User getUser() {
             return user.get();
         }
 
+        /**
+         * User property object property.
+         *
+         * @return the object property
+         */
         public ObjectProperty<User> userProperty() {
             return user;
         }
     }
 
-   public abstract class Schedulable{
+    /**
+     * The type Schedulable. Anything that can be scheduled
+     */
+    public abstract class Schedulable{
 
        private IntegerProperty ID = new SimpleIntegerProperty();
        private ObservableList<Appointment> appointments = FXCollections.observableArrayList();
        private ObservableList<LocalTime> availableTimes = FXCollections.observableArrayList();
-       LocalTime startTime;
-       LocalTime endTime;
+        /**
+         * The Start time.
+         */
+        LocalTime startTime;
+        /**
+         * The End time.
+         */
+        LocalTime endTime;
 
-       Schedulable(){
+        /**
+         * Instantiates a new Schedulable.
+         */
+        Schedulable(){
            ZonedDateTime zonedStart =  ZonedDateTime.of(LocalDate.now(),LocalTime.of(8,0,0),ZoneId.of("US/Eastern"));
            startTime = zonedStart.toInstant().atZone(ZoneId.systemDefault()).toLocalTime();
            ZonedDateTime zonedEnd  =   ZonedDateTime.of(LocalDate.now(),LocalTime.of(22,0,0),ZoneId.of("US/Eastern"));
            endTime = zonedEnd.toInstant().atZone(ZoneId.systemDefault()).toLocalTime();
        }
 
-       public int getID() {
+        /**
+         * Gets id.
+         *
+         * @return the id
+         */
+        public int getID() {
            return ID.get();
        }
 
-       public IntegerProperty IDProperty() {
+        /**
+         * Id property integer property.
+         *
+         * @return the integer property
+         */
+        public IntegerProperty IDProperty() {
            return ID;
        }
 
-       public void setID(int ID) {
+        /**
+         * Sets id.
+         *
+         * @param ID the id
+         */
+        public void setID(int ID) {
            this.ID.set(ID);
        }
 
-       public void deleteFromDB(){
+        /**
+         * Delete from db.
+         */
+        public void deleteFromDB(){
 
            String deleteSchedulable = "DELETE FROM "+ this.getClass().getName().toLowerCase()+ "s WHERE " + this.getClass().getName().toLowerCase()+ "_ID=" + getID();
            System.out.println(deleteSchedulable);
@@ -425,7 +655,15 @@ public class Scheduler extends Application {
        }
 
 
-       public ObservableList<LocalTime> GetAvailableStartTimes(ArrayList<Schedulable> parties,LocalDate date,Appointment exclude){
+        /**
+         * Get available start times observable list.
+         *
+         * @param parties the parties
+         * @param date    the date
+         * @param exclude the exclude
+         * @return the observable list
+         */
+        public ObservableList<LocalTime> GetAvailableStartTimes(ArrayList<Schedulable> parties,LocalDate date,Appointment exclude){
 
 
            ObservableList<LocalTime> availTimes = FXCollections.observableArrayList();
@@ -477,7 +715,16 @@ public class Scheduler extends Application {
            return availTimes;
        }
 
-       public ObservableList<LocalTime> GetAvailableEndTimes(ArrayList<Schedulable> parties, LocalTime start,LocalDate date,Appointment exclude)
+        /**
+         * Get available end times observable list.
+         *
+         * @param parties the parties
+         * @param start   the start
+         * @param date    the date
+         * @param exclude the exclude
+         * @return the observable list
+         */
+        public ObservableList<LocalTime> GetAvailableEndTimes(ArrayList<Schedulable> parties, LocalTime start,LocalDate date,Appointment exclude)
        {
 
 
@@ -521,11 +768,23 @@ public class Scheduler extends Application {
            return availTimes;
 
        }
-       public ObservableList<Appointment> getAppointments() {
+
+        /**
+         * Gets appointments.
+         *
+         * @return the appointments
+         */
+        public ObservableList<Appointment> getAppointments() {
            return appointments;
        }
 
-       public ObservableList<Appointment> getAppointmentsByDate(LocalDate date) {
+        /**
+         * Gets appointments by date.
+         *
+         * @param date the date
+         * @return the appointments by date
+         */
+        public ObservableList<Appointment> getAppointmentsByDate(LocalDate date) {
            ObservableList<Appointment> temp = FXCollections.observableArrayList();
 
            for(Appointment a : appointments){
@@ -539,39 +798,82 @@ public class Scheduler extends Application {
        }
 
 
-
-       public void AddAppointment(Appointment appointment){
+        /**
+         * Add appointment.
+         *
+         * @param appointment the appointment
+         */
+        public void AddAppointment(Appointment appointment){
            appointments.add(appointment);
        }
-       public void setAppointments(ObservableList<Appointment> appointments) {
+
+        /**
+         * Sets appointments.
+         *
+         * @param appointments the appointments
+         */
+        public void setAppointments(ObservableList<Appointment> appointments) {
            this.appointments = appointments;
        }
 
-       public ObservableList<LocalTime> getAvailableTimes() {
+        /**
+         * Gets available times.
+         *
+         * @return the available times
+         */
+        public ObservableList<LocalTime> getAvailableTimes() {
            return availableTimes;
        }
 
-       public void setAvailableTimes(ObservableList<LocalTime> availableTimes) {
+        /**
+         * Sets available times.
+         *
+         * @param availableTimes the available times
+         */
+        public void setAvailableTimes(ObservableList<LocalTime> availableTimes) {
            this.availableTimes = availableTimes;
        }
 
-       public LocalTime getStartTime() {
+        /**
+         * Gets start time.
+         *
+         * @return the start time
+         */
+        public LocalTime getStartTime() {
            return startTime;
        }
 
-       public void setStartTime(LocalTime startTime) {
+        /**
+         * Sets start time.
+         *
+         * @param startTime the start time
+         */
+        public void setStartTime(LocalTime startTime) {
            this.startTime = startTime;
        }
 
-       public LocalTime getEndTime() {
+        /**
+         * Gets end time.
+         *
+         * @return the end time
+         */
+        public LocalTime getEndTime() {
            return endTime;
        }
 
-       public void setEndTime(LocalTime endTime) {
+        /**
+         * Sets end time.
+         *
+         * @param endTime the end time
+         */
+        public void setEndTime(LocalTime endTime) {
            this.endTime = endTime;
        }
 
-       public void deleteAllAppointments(){
+        /**
+         * Delete all appointments.
+         */
+        public void deleteAllAppointments(){
 
            for(Appointment a : appointments){
                a.deleteFromDB();
@@ -583,12 +885,22 @@ public class Scheduler extends Application {
 
    }
 
+    /**
+     * The type Contact.
+     */
     public class Contact extends Schedulable{
 
         private StringProperty name = new SimpleStringProperty();
         private StringProperty email = new SimpleStringProperty();
 
 
+        /**
+         * Instantiates a new Contact.
+         *
+         * @param contactID the contact id
+         * @param name      the name
+         * @param email     the email
+         */
         public Contact(int contactID,String name, String email){
             this.name.set(name);
             super.setID(contactID);
@@ -600,32 +912,65 @@ public class Scheduler extends Application {
             return this.getName();
         }
 
+        /**
+         * Gets name.
+         *
+         * @return the name
+         */
         public String getName() {
             return name.get();
         }
 
+        /**
+         * Name property string property.
+         *
+         * @return the string property
+         */
         public StringProperty nameProperty() {
             return name;
         }
 
+        /**
+         * Sets name.
+         *
+         * @param name the name
+         */
         public void setName(String name) {
             this.name.set(name);
         }
 
+        /**
+         * Gets email.
+         *
+         * @return the email
+         */
         public String getEmail() {
             return email.get();
         }
 
+        /**
+         * Email property string property.
+         *
+         * @return the string property
+         */
         public StringProperty emailProperty() {
             return email;
         }
 
+        /**
+         * Sets email.
+         *
+         * @param email the email
+         */
         public void setEmail(String email) {
             this.email.set(email);
         }
 
     }
 
+    /**
+     * The type Customer.
+     */
     public class Customer extends Schedulable{
 
         private StringProperty name = new SimpleStringProperty();
@@ -637,6 +982,17 @@ public class Scheduler extends Application {
         private StringProperty firstLevelString = new SimpleStringProperty();
         private StringProperty countryString = new SimpleStringProperty();
 
+        /**
+         * Instantiates a new Customer.
+         *
+         * @param customerID the customer id
+         * @param name       the name
+         * @param address    the address
+         * @param countryID  the country id
+         * @param divisionID the division id
+         * @param phone      the phone
+         * @param postalCode the postal code
+         */
         public Customer(int customerID,String name,String address, int countryID,int divisionID, String phone, String postalCode){
             super.setID(customerID);
             this.name.set(name);
@@ -658,99 +1014,219 @@ public class Scheduler extends Application {
         }
 
 
+        /**
+         * Gets first level string.
+         *
+         * @return the first level string
+         */
         public String getFirstLevelString() {
             return firstLevelString.get();
         }
 
+        /**
+         * First level string property string property.
+         *
+         * @return the string property
+         */
         public StringProperty firstLevelStringProperty() {
             return firstLevelString;
         }
 
+        /**
+         * Sets first level string.
+         *
+         * @param firstLevelString the first level string
+         */
         public void setFirstLevelString(String firstLevelString) {
             this.firstLevelString.set(firstLevelString);
         }
 
+        /**
+         * Gets country string.
+         *
+         * @return the country string
+         */
         public String getCountryString() {
             return countryString.get();
         }
 
+        /**
+         * Country string property string property.
+         *
+         * @return the string property
+         */
         public StringProperty countryStringProperty() {
             return countryString;
         }
 
+        /**
+         * Sets country string.
+         *
+         * @param countryString the country string
+         */
         public void setCountryString(String countryString) {
             this.countryString.set(countryString);
         }
 
 
+        /**
+         * Gets name.
+         *
+         * @return the name
+         */
         public String getName() {
             return name.get();
         }
 
+        /**
+         * Name property string property.
+         *
+         * @return the string property
+         */
         public StringProperty nameProperty() {
             return name;
         }
 
+        /**
+         * Sets name.
+         *
+         * @param name the name
+         */
         public void setName(String name) {
             this.name.set(name);
         }
 
+        /**
+         * Gets address.
+         *
+         * @return the address
+         */
         public String getAddress() {
             return address.get();
         }
 
+        /**
+         * Address property string property.
+         *
+         * @return the string property
+         */
         public StringProperty addressProperty() {
             return address;
         }
 
+        /**
+         * Sets address.
+         *
+         * @param address the address
+         */
         public void setAddress(String address) {
             this.address.set(address);
         }
 
+        /**
+         * Gets country id.
+         *
+         * @return the country id
+         */
         public int getCountryID() {
             return countryID.get();
         }
 
+        /**
+         * Country id property integer property.
+         *
+         * @return the integer property
+         */
         public IntegerProperty countryIDProperty() {
             return countryID;
         }
 
+        /**
+         * Sets country id.
+         *
+         * @param countryID the country id
+         */
         public void setCountryID(int countryID) {
             this.countryID.set(countryID);
         }
 
+        /**
+         * Gets division id.
+         *
+         * @return the division id
+         */
         public int getDivisionID() {
             return divisionID.get();
         }
 
+        /**
+         * Division id property integer property.
+         *
+         * @return the integer property
+         */
         public IntegerProperty divisionIDProperty() {
             return divisionID;
         }
 
+        /**
+         * Sets division id.
+         *
+         * @param divisionID the division id
+         */
         public void setDivisionID(int divisionID) {
             this.divisionID.set(divisionID);
         }
 
+        /**
+         * Gets phone.
+         *
+         * @return the phone
+         */
         public String getPhone() {
             return phone.get();
         }
 
+        /**
+         * Phone property string property.
+         *
+         * @return the string property
+         */
         public StringProperty phoneProperty() {
             return phone;
         }
 
+        /**
+         * Sets phone.
+         *
+         * @param phone the phone
+         */
         public void setPhone(String phone) {
             this.phone.set(phone);
         }
 
+        /**
+         * Gets postal code.
+         *
+         * @return the postal code
+         */
         public String getPostalCode() {
             return postalCode.get();
         }
 
+        /**
+         * Postal code property string property.
+         *
+         * @return the string property
+         */
         public StringProperty postalCodeProperty() {
             return postalCode;
         }
 
+        /**
+         * Sets postal code.
+         *
+         * @param postalCode the postal code
+         */
         public void setPostalCode(String postalCode) {
             this.postalCode.set(postalCode);
         }
@@ -772,6 +1248,9 @@ public class Scheduler extends Application {
 
         }
 
+        /**
+         * Add to db.
+         */
         public void addToDB(){
 
 
@@ -805,7 +1284,17 @@ public class Scheduler extends Application {
 
     }
 
+    /**
+     * The type User.
+     */
     public class User extends Schedulable {
+        /**
+         * Instantiates a new User.
+         *
+         * @param userID   the user id
+         * @param username the username
+         * @param password the password
+         */
         User(int userID,String username,String password){
             this.username= username;
             super.setID(userID);
@@ -821,24 +1310,47 @@ public class Scheduler extends Application {
             return Integer.toString(this.getID());
         }
 
+        /**
+         * Gets username.
+         *
+         * @return the username
+         */
         public String getUsername() {
             return username;
         }
 
+        /**
+         * Sets username.
+         *
+         * @param username the username
+         */
         public void setUsername(String username) {
             this.username = username;
         }
 
+        /**
+         * Gets password.
+         *
+         * @return the password
+         */
         public String getPassword() {
             return password;
         }
 
+        /**
+         * Sets password.
+         *
+         * @param password the password
+         */
         public void setPassword(String password) {
             this.password = password;
         }
     }
 
 
+    /**
+     * Parse sql for all customers,contacts,countries,divisions and appointments and sets up classes
+     */
     public void parseSQL(){
 
 
@@ -1078,38 +1590,61 @@ public class Scheduler extends Application {
     }
 
 
+    /**
+     * Gets customers.
+     *
+     * @return the customers
+     */
     public ObservableList<Customer> getCustomers() {
         return customers;
     }
 
-    public void setCustomers(ObservableList<Customer> customers) {
-        this.customers = customers;
-    }
 
+    /**
+     * Gets users.
+     *
+     * @return the users
+     */
     public ObservableList<User> getUsers() {
         return users;
     }
 
-    public void setUsers(ObservableList<User> users) {
-        this.users = users;
-    }
 
+    /**
+     * Gets contacts.
+     *
+     * @return the contacts
+     */
     public ObservableList<Contact> getContacts() {
         return contacts;
     }
 
-    public void setContacts(ObservableList<Contact> contacts) {
-        this.contacts = contacts;
-    }
 
+    /**
+     * Gets user.
+     *
+     * @return the user
+     */
     public static User getUser() {
         return user;
     }
 
+    /**
+     * Sets user.
+     *
+     * @param user the user
+     */
     public void setUser(User user) {
         this.user = user;
     }
 
+    /**
+     * Convert to utc stamp timestamp.
+     *
+     * @param date the date
+     * @param time the time
+     * @return the timestamp
+     */
     public static Timestamp convertToUTCStamp(LocalDate date, LocalTime time){
 
         ZonedDateTime temp = LocalDateTime.of(date,time).atZone(ZoneId.systemDefault());
@@ -1119,6 +1654,12 @@ public class Scheduler extends Application {
 
     }
 
+    /**
+     * Gets divisions by country.
+     *
+     * @param countryName the country name
+     * @return the divisions by country
+     */
     public ObservableList<FirstLevelDivision> getDivisionsByCountry(String countryName) {
         ObservableList<FirstLevelDivision> temp = FXCollections.observableArrayList();
 
@@ -1133,6 +1674,11 @@ public class Scheduler extends Application {
         return temp;
     }
 
+    /**
+     * Get country names observable list.
+     *
+     * @return the observable list
+     */
     public ObservableList<String> getCountryNames(){
         ObservableList<String> temp = FXCollections.observableArrayList();
         for(String s : countries.values()){
@@ -1143,17 +1689,45 @@ public class Scheduler extends Application {
 
     }
 
+    /**
+     * Sets divisions.
+     *
+     * @param divisions the divisions
+     */
     public void setDivisions(ObservableList<FirstLevelDivision> divisions) {
         this.divisions = divisions;
     }
 
+    /**
+     * The type First level division.
+     */
     public class FirstLevelDivision  {
 
+        /**
+         * The Country name.
+         */
         String CountryName;
+        /**
+         * The First level name.
+         */
         String firstLevelName;
+        /**
+         * The Country id.
+         */
         int countryID;
+        /**
+         * The First level id.
+         */
         int firstLevelID;
 
+        /**
+         * Instantiates a new First level division.
+         *
+         * @param countryID      the country id
+         * @param firstLevelID   the first level id
+         * @param countryName    the country name
+         * @param firstLevelName the first level name
+         */
         FirstLevelDivision(int countryID,int firstLevelID,String countryName,String firstLevelName){
             this.countryID = countryID;
             this.firstLevelName = firstLevelName;
@@ -1165,45 +1739,103 @@ public class Scheduler extends Application {
             return firstLevelName;
       }
 
-      public String getCountryName() {
+        /**
+         * Gets country name.
+         *
+         * @return the country name
+         */
+        public String getCountryName() {
           return CountryName;
       }
 
-      public void setCountryName(String countryName) {
+        /**
+         * Sets country name.
+         *
+         * @param countryName the country name
+         */
+        public void setCountryName(String countryName) {
           CountryName = countryName;
       }
 
-      public String getFirstLevelName() {
+        /**
+         * Gets first level name.
+         *
+         * @return the first level name
+         */
+        public String getFirstLevelName() {
           return firstLevelName;
       }
 
-      public void setFirstLevelName(String firstLevelName) {
+        /**
+         * Sets first level name.
+         *
+         * @param firstLevelName the first level name
+         */
+        public void setFirstLevelName(String firstLevelName) {
           this.firstLevelName = firstLevelName;
       }
 
-      public int getCountryID() {
+        /**
+         * Gets country id.
+         *
+         * @return the country id
+         */
+        public int getCountryID() {
           return countryID;
       }
 
-      public void setCountryID(int countryID) {
+        /**
+         * Sets country id.
+         *
+         * @param countryID the country id
+         */
+        public void setCountryID(int countryID) {
           this.countryID = countryID;
       }
 
-      public int getFirstLevelID() {
+        /**
+         * Gets first level id.
+         *
+         * @return the first level id
+         */
+        public int getFirstLevelID() {
           return firstLevelID;
       }
 
-      public void setFirstLevelID(int firstLevelID) {
+        /**
+         * Sets first level id.
+         *
+         * @param firstLevelID the first level id
+         */
+        public void setFirstLevelID(int firstLevelID) {
           this.firstLevelID = firstLevelID;
       }
   }
 
-  public Customer createCustomer(int customerID,String name,String address, int countryID,int divisionID, String phone, String postalCode){
+    /**
+     * Create customer customer.
+     *
+     * @param customerID the customer id
+     * @param name       the name
+     * @param address    the address
+     * @param countryID  the country id
+     * @param divisionID the division id
+     * @param phone      the phone
+     * @param postalCode the postal code
+     * @return the customer
+     */
+    public Customer createCustomer(int customerID,String name,String address, int countryID,int divisionID, String phone, String postalCode){
         Customer customer = new Customer(customerID,name,address,countryID,divisionID,phone,postalCode);
         return customer;
   }
 
-  public String getDivisionName(int divID){
+    /**
+     * Get division name string.
+     *
+     * @param divID the div id
+     * @return the string
+     */
+    public String getDivisionName(int divID){
         String temp = "";
         for(FirstLevelDivision d : divisions){
             if(d.getFirstLevelID() == divID){
@@ -1214,7 +1846,13 @@ public class Scheduler extends Application {
         return temp;
   }
 
-  public FirstLevelDivision getDivision(int divID){
+    /**
+     * Get division from division by div id.
+     *
+     * @param divID the div id
+     * @return the first level division
+     */
+    public FirstLevelDivision getDivision(int divID){
         for(FirstLevelDivision d : divisions){
             if (d.getFirstLevelID()== divID){
                 return d;
@@ -1225,11 +1863,19 @@ public class Scheduler extends Application {
 
   }
 
-  public void onCancelClicked(){
+    /**
+     * On cancel clicked. Closes the login Window
+     */
+    public void onCancelClicked(){
 
        System.exit(0);
   }
-  public void onLoginClicked(){
+
+    /**
+     * On login clicked.
+     * Checks username and password and logs to file
+     */
+    public void onLoginClicked(){
         User u = userNameMatch(userName.getText());
 
         String status = "Login failed";
@@ -1280,7 +1926,13 @@ public class Scheduler extends Application {
       }
   }
 
-  User userNameMatch(String username){
+    /**
+     * User name match user.
+     *
+     * @param username the username
+     * @return the user
+     */
+    User userNameMatch(String username){
         System.out.println("UN Firing");
         System.out.println(getUsers().size() + "HERE");
         System.out.println(this.users);
@@ -1295,9 +1947,14 @@ public class Scheduler extends Application {
         }
 
 
-
-
-  boolean passwordMatch(String password,User u){
+    /**
+     * Password match boolean.
+     *
+     * @param password the password
+     * @param u        the u
+     * @return the boolean
+     */
+    boolean passwordMatch(String password,User u){
         System.out.println("PASSWORD  FIRING");
         if(password.equals(u.getPassword())){
             return true;
