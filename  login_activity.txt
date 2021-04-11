@@ -1,0 +1,18 @@
+
+Login Attempt:
+
+Username:t
+Date and Time: 2021-04-11T17:09:13.367537500
+Login failed
+
+Login Attempt:
+
+Username:test
+Date and Time: 2021-04-11T17:09:18.623187800
+Login failed
+
+Login Attempt:
+
+Username:test
+Date and Time: 2021-04-11T17:09:21.573116400
+Login Succeeded

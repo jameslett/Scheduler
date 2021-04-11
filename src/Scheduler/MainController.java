@@ -14,10 +14,8 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 import java.io.IOException;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
+import java.util.Optional;
 
 
 public class MainController {
@@ -26,6 +24,7 @@ public class MainController {
     private Scheduler.Appointment selectedAppointment;
     private Scheduler.Appointment tempAppointment;
     private Scheduler.Customer selectedCustomer;
+    private Scheduler.Customer tempCustomer;
     private Stage appointmentStage;
     private Stage customerStage;
     private  AddAppointmentController appointmentController;
@@ -33,7 +32,7 @@ public class MainController {
 
 
     private Scheduler.User user;
-    private ObservableList<Scheduler.Appointment> appointmentObservableList;
+    private ObservableList<Scheduler.Appointment> appointmentObservableList = FXCollections.observableArrayList();
 
     // appointments
     @FXML
@@ -108,7 +107,7 @@ public class MainController {
     private Button deleteAppointmentButton;
     @FXML
     private Button addCustomerButton;
-
+    @FXML TextArea reportArea = new TextArea();
 
 
 
@@ -245,10 +244,54 @@ public class MainController {
             selectedAppointment.deleteFromDB();
             selectedAppointment.deleteAppointment();
             appointmentObservableList.remove(selectedAppointment);
+            selectedAppointment = null;
+            Alert alert2 = new Alert(Alert.AlertType.INFORMATION);
+            alert2.setTitle("Information Dialog");
+            alert2.setHeaderText(null);
+            alert2.setContentText("Appointment Deleted");
+
+            alert2.showAndWait();
+
+
         } else {
             selectAppointmentPopup();
         }
     }
+
+    public void onCustomerDeleteClicked() {
+
+
+
+        if (selectedCustomer != null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING,"", ButtonType.YES, ButtonType.NO);
+            alert.setTitle("Warning!");
+            alert.setContentText("Are you sure you want to delete " +selectedCustomer.getName() +
+                    "?\nDeleting this customer will delete all of their appointments!");
+
+
+            Optional<ButtonType> result = alert.showAndWait();
+            if (result.get() == ButtonType.YES){
+
+                selectedCustomer.deleteAllAppointments();
+
+                selectedCustomer.deleteFromDB();
+                scheduler.getCustomers().remove(selectedCustomer);
+                selectedCustomer = null;
+                Alert alert2 = new Alert(Alert.AlertType.INFORMATION);
+                alert2.setTitle("Information Dialog");
+                alert2.setHeaderText(null);
+                alert2.setContentText("Customer Deleted");
+
+                alert2.showAndWait();
+
+            } else {
+                alert.close();
+            }
+        } else {
+            selectCustomerPopup();
+        }
+    }
+
     public void onAppointmentModifyClicked() {
 
         if (selectedAppointment != null) {
@@ -274,6 +317,25 @@ public class MainController {
             selectAppointmentPopup();
         }
     }
+
+    public void onCustomerModifyClicked() {
+
+        if (selectedCustomer != null) {
+            showAddCustomerWindow();
+            customerController.getCustomerIDTextField().setText(Integer.toString(selectedCustomer.getID()));
+            customerController.getCustomerNameTextField().setText(selectedCustomer.getName());
+            customerController.getCustomerAddressTextField().setText(selectedCustomer.getAddress());
+            customerController.getCustomerPostalTextField().setText(selectedCustomer.getPostalCode());
+            customerController.getCustomerPhoneTextField().setText(selectedCustomer.getPhone());
+            customerController.getCustomerCountryComboBox().getSelectionModel().select(selectedCustomer.getCountryString());
+            customerController.getCustomerFirstLevelComboBox().getSelectionModel().select(scheduler.getDivision(selectedCustomer.getDivisionID()));
+
+
+
+        } else {
+            selectCustomerPopup();
+        }
+    }
     public void onAppointmentAddClicked() {
 
         showAddAppointmentWindow();
@@ -293,6 +355,16 @@ public class MainController {
 
         alert.showAndWait();
         }
+
+    public void selectCustomerPopup(){
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Information Dialog");
+        alert.setHeaderText(null);
+        alert.setContentText("Please Select a Customer.");
+
+        alert.showAndWait();
+    }
+
 
 
     public void showAddAppointmentWindow() {
@@ -427,7 +499,31 @@ public class MainController {
 
     }
 
+
+
     public void saveCustomer(){
+
+
+        if(selectedCustomer != null) {
+
+
+            selectedCustomer.deleteFromDB();
+            scheduler.getCustomers().remove(selectedCustomer);
+
+        }
+
+
+        AddCustomerController cc = customerController;
+
+
+
+        tempCustomer = scheduler.createCustomer(cc.getCustomerID(),cc.getName(),cc.getAddress(),cc.getFirstLevel().getCountryID(),cc.getFirstLevel().getFirstLevelID(),cc.getPhone(),cc.getPostal());
+        tempCustomer.addToDB();
+        scheduler.getCustomers().add(tempCustomer);
+
+        customerController.clearFields();
+        selectedCustomer = null;
+        customerStage.close();
 
     }
 
@@ -445,5 +541,72 @@ public class MainController {
 
     public void onAddCustomerClicked(){
         showAddCustomerWindow();
+    }
+
+    public ObservableList<Scheduler.Appointment> getAppointmentObservableList() {
+        return appointmentObservableList;
+    }
+
+    public void setAppointmentObservableList(ObservableList<Scheduler.Appointment> appointmentObservableList) {
+        this.appointmentObservableList = appointmentObservableList;
+    }
+    public void onReportTab(){
+        reportArea.clear();
+        reportArea.appendText("Appointments By month and type :\n");
+        for(Month m : getMonths()){
+            reportArea.appendText(m.toString()+"\nBy Type:\n");
+            for(String s : getTypes()){
+                reportArea.appendText(s + " :" +getNumberOfAppointmentsByMonthAndType(m,s)+ "\n");
+            }
+        }
+        reportArea.appendText("\nUser Schedules :\n");
+        for(Scheduler.User u : scheduler.getUsers()){
+            reportArea.appendText("\n"+u.getUsername() + "s appointments:\n\n");
+            //appointment ID, title, type and description, start date and time, end date and time, and customer ID
+            for(Scheduler.Appointment a : u.getAppointments()){
+                reportArea.appendText("\nAppointment ID: " + a.getAppointmentID());
+                reportArea.appendText("\nTitle: " + a.getTitle());
+                reportArea.appendText("\nDate: " + a.getDate());
+                reportArea.appendText("\nStart Time:  " + a.getStartTime());
+                reportArea.appendText("\nEnd Time: " + a.getEndTime());
+                reportArea.appendText("\nCustomerID: " + a.getCustomer().getID() + "\n");
+            }
+        }
+        reportArea.appendText("Report 3 Total Number of appointments :\n" + getAppointmentObservableList().size());
+
+    }
+    public ObservableList<String> getTypes(){
+        ObservableList<String> temp = FXCollections.observableArrayList();
+
+        for(Scheduler.Appointment a : appointmentObservableList ){
+            if(!temp.contains(a.getType())){
+                temp.add(a.getType());
+            }
+        }
+        return temp;
+    }
+
+    public ObservableList<Month> getMonths() {
+        ObservableList<Month> temp = FXCollections.observableArrayList();
+
+        for(Scheduler.Appointment a :appointmentObservableList ){
+            if(!temp.contains(a.getDate().getMonth())){
+                temp.add(a.getDate().getMonth());
+            }
+        }
+
+        return temp;
+    }
+
+    public int getNumberOfAppointmentsByMonthAndType(Month month,String type) {
+
+        int temp = 0;
+        for(Scheduler.Appointment a :appointmentObservableList ){
+            if(a.getDate().getMonth().equals(month) && a.getType().equals(type)){
+                temp++;
+            }
+        }
+
+        return temp;
     }
 }

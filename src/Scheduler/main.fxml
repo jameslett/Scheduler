@@ -12,6 +12,7 @@
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
@@ -44,7 +45,7 @@
             </MenuBar>
             <TabPane prefHeight="660.0" prefWidth="800.4" tabClosingPolicy="UNAVAILABLE">
               <tabs>
-                <Tab text="Untitled Tab 1">
+                <Tab text="Appointments">
                      <content>
                         <BorderPane>
                            <center>
@@ -108,7 +109,7 @@
                         </BorderPane>
                      </content>
                 </Tab>
-                <Tab text="Untitled Tab 2">
+                <Tab text="Customers">
                      <content>
                         <BorderPane>
                            <center>
@@ -132,8 +133,8 @@
                                           <ButtonBar prefHeight="46.0" prefWidth="676.0">
                                              <buttons>
                                                 <Button fx:id="addCustomerButton" mnemonicParsing="false" onAction="#onAddCustomerClicked" prefHeight="26.0" prefWidth="192.0" text="Add Customer" />
-                                                <Button layoutX="404.0" layoutY="20.0" mnemonicParsing="false" text="Modify Customer" />
-                                                <Button alignment="CENTER" layoutX="404.0" layoutY="20.0" mnemonicParsing="false" text="Delete Customer" textAlignment="CENTER" />
+                                                <Button layoutX="404.0" layoutY="20.0" mnemonicParsing="false" onAction="#onCustomerModifyClicked" text="Modify Customer" />
+                                                <Button alignment="CENTER" layoutX="404.0" layoutY="20.0" mnemonicParsing="false" onAction="#onCustomerDeleteClicked" text="Delete Customer" textAlignment="CENTER" />
                                              </buttons>
                                           </ButtonBar>
                                        </children>
@@ -144,6 +145,20 @@
                         </BorderPane>
                      </content>
                 </Tab>
+                  <Tab text="Reports">
+                    <content>
+                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                           <children>
+                              <HBox prefHeight="598.0" prefWidth="777.0">
+                                 <children>
+                                    <TextArea fx:id="reportArea" prefHeight="598.0" prefWidth="674.0" />
+                                    <Button mnemonicParsing="false" onAction="#onReportTab" text="Generate Report" />
+                                 </children>
+                              </HBox>
+                           </children>
+                        </AnchorPane>
+                    </content>
+                  </Tab>
               </tabs>
             </TabPane>
          </children>

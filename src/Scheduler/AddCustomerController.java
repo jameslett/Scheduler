@@ -244,7 +244,7 @@ public class AddCustomerController {
 
     else {
 
-            phone = phone.substring(0,phone.length()-10) + "-" + phone.substring(phone.length()-10 ,phone.length()-7)+ "-" + phone.substring(phone.length()-7,phone.length()-4) + "-" + phone.substring(phone.length()-4,phone.length()-1);
+            phone = phone.substring(0,phone.length()-10) + "-" + phone.substring(phone.length()-10 ,phone.length()-7)+ "-" + phone.substring(phone.length()-7,phone.length()-4) + "-" + phone.substring(phone.length()-4,phone.length());
             System.out.println(phone);
         controller.saveCustomer();}
     }
@@ -257,6 +257,16 @@ public class AddCustomerController {
 
 
     public void clearFields(){
+
+            customerIDTextField.clear();
+            customerNameTextField.clear();
+            customerAddressTextField.clear();
+            customerPostalTextField.clear();
+            customerPhoneTextField.clear();
+
+          customerCountryComboBox.getSelectionModel().clearSelection();
+          customerFirstLevelComboBox.getSelectionModel().clearSelection();
+
 
     }
 

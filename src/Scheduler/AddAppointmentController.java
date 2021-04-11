@@ -77,8 +77,8 @@ public class AddAppointmentController {
             else{
                 today = LocalDate.now();
             }
-            setDisable(bool || date.compareTo(today) < 0 );
-            setDisable((bool || (date.getDayOfWeek() == DayOfWeek.SUNDAY || date.getDayOfWeek() == DayOfWeek.SATURDAY )));
+            setDisable(bool || (date.compareTo(today) < 0  || date.getDayOfWeek() == DayOfWeek.SATURDAY ) );
+
 
         }
 
@@ -96,106 +96,75 @@ public class AddAppointmentController {
         return appointmentIDTextField;
     }
 
-    public void setAppointmentIDTextField(TextField appointmentIDTextField) {
-        this.appointmentIDTextField = appointmentIDTextField;
-    }
+
 
     public TextField getAppointmentTitleTextField() {
         return appointmentTitleTextField;
     }
 
-    public void setAppointmentTitleTextField(TextField appointmentTitleTextField) {
-        this.appointmentTitleTextField = appointmentTitleTextField;
-    }
+
 
     public TextField getAppointmentDescriptionTextField() {
         return appointmentDescriptionTextField;
     }
 
-    public void setAppointmentDescriptionTextField(TextField appointmentDescriptionTextField) {
-        this.appointmentDescriptionTextField = appointmentDescriptionTextField;
-    }
+
 
     public TextField getAppointmentLocationTextField() {
         return appointmentLocationTextField;
     }
 
-    public void setAppointmentLocationTextField(TextField appointmentLocationTextField) {
-        this.appointmentLocationTextField = appointmentLocationTextField;
-    }
 
     public TextField getAppointmentCustomerNameTextField() {
         return appointmentCustomerNameTextField;
     }
 
-    public void setAppointmentCustomerNameTextField(TextField appointmentCustomerNameTextField) {
-        this.appointmentCustomerNameTextField = appointmentCustomerNameTextField;
-    }
 
     public TextField getAppointmentUserNameTextField() {
         return appointmentUserNameTextField;
     }
 
-    public void setAppointmentUserNameTextField(TextField appointmentUserNameTextField) {
-        this.appointmentUserNameTextField = appointmentUserNameTextField;
-    }
+
 
     public TextField getAppointmentTypeTextField() {
         return appointmentTypeTextField;
     }
 
-    public void setAppointmentTypeTextField(TextField appointmentTypeTextField) {
-        this.appointmentTypeTextField = appointmentTypeTextField;
-    }
 
     public ComboBox getAppointmentContactComboBox() {
         return appointmentContactComboBox;
     }
 
-    public void setAppointmentContactComboBox(ComboBox appointmentContactComboBox) {
-        this.appointmentContactComboBox = appointmentContactComboBox;
-    }
+
 
     public ComboBox getAppointmentCustomerIDComboBox() {
         return appointmentCustomerIDComboBox;
     }
 
-    public void setAppointmentCustomerIDComboBox(ComboBox appointmentCustomerIDComboBox) {
-        this.appointmentCustomerIDComboBox = appointmentCustomerIDComboBox;
-    }
 
     public ComboBox getAppointmentUserIDComboBox() {
         return appointmentUserIDComboBox;
     }
 
-    public void setAppointmentUserIDComboBox(ComboBox appointmentUserIDComboBox) {
-        this.appointmentUserIDComboBox = appointmentUserIDComboBox;
-    }
+
 
     public ComboBox getAppointmentStartTimeComboBox() {
         return appointmentStartTimeComboBox;
     }
 
-    public void setAppointmentStartTimeComboBox(ComboBox appointmentStartTimeComboBox) {
-        this.appointmentStartTimeComboBox = appointmentStartTimeComboBox;
-    }
+
 
     public ComboBox getAppointmentEndTimeComboBox() {
         return appointmentEndTimeComboBox;
     }
 
-    public void setAppointmentEndTimeComboBox(ComboBox appointmentEndTimeComboBox) {
-        this.appointmentEndTimeComboBox = appointmentEndTimeComboBox;
-    }
+
 
     public DatePicker getAppointmentDatePicker() {
         return appointmentDatePicker;
     }
 
-    public void setAppointmentDatePicker(DatePicker appointmentDatePicker) {
-        this.appointmentDatePicker = appointmentDatePicker;
 
-    }
 
     public void onSaveClicked(){
 

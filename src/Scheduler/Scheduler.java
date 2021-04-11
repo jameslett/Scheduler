@@ -4,31 +4,43 @@ import javafx.application.Application;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.*;
 import java.time.*;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 
 
 public class Scheduler extends Application {
 
     private ObservableList<Customer> customers = FXCollections.observableArrayList();
-    private ObservableList<User> users  = FXCollections.observableArrayList();
+    private static ObservableList<User> users  = FXCollections.observableArrayList();
 
     private ObservableList<Contact> contacts = FXCollections.observableArrayList();
     private ObservableList<FirstLevelDivision>divisions = FXCollections.observableArrayList();
     private HashMap<Integer,String> firstLevelDivisions = new HashMap<Integer, String>();
     private HashMap<Integer,String> countries = new HashMap<Integer, String>();
     private HashMap<Integer,Integer> firstLevelToCountry = new HashMap<Integer,Integer>();
-
+    static Stage loginStage = new Stage();
+    static ResourceBundle resourceBundle;
     private static User user;
+    MainController controller;
+    @FXML
+    private Button login = new Button();
+    @FXML
+    TextField userName = new TextField();
+    @FXML
+    PasswordField passwordField = new PasswordField();
 
     public static void main(String[] args) {
 
@@ -49,6 +61,60 @@ public class Scheduler extends Application {
 
         parseSQL();
 
+        boolean hasAppointment = false;
+
+        Locale locale = Locale.getDefault();
+        resourceBundle= ResourceBundle.getBundle("login", locale);
+
+        FXMLLoader loader2 = new FXMLLoader(getClass().getResource("login.fxml"));
+        loader2.setResources(resourceBundle);
+        Parent root2 = loader2.load();
+
+
+        loginStage.setTitle("Login" );
+        loginStage.setScene(new Scene(root2));
+        System.out.println(this.users.size() + "Before Shw");
+        loginStage.initStyle(StageStyle.UNDECORATED);
+        loginStage.showAndWait();
+        System.out.println(this.users.size() + "After Shw");
+
+
+
+
+
+
+
+
+
+        for(Appointment a : user.getAppointments()){
+            System.out.println(a.getStartTime().getMinute()-LocalTime.now().getMinute() <= 15);
+            if (a.getStartTime().getHour() == LocalTime.now().getHour() &&
+                    a.getStartTime().getMinute()-LocalTime.now().getMinute() <= 15 &&
+            a.getDate().equals(LocalDate.now())&&
+            a.getStartDateTime().isAfter(LocalDateTime.now())){
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Upcoming Appointments");
+                alert.setHeaderText(null);
+                alert.setContentText("You have an upcoming appointment with " + a.getCustomer().getName()+" in "+  (a.getStartTime().getMinute()-LocalTime.now().getMinute()) +" minutes") ;
+
+                alert.showAndWait();
+                hasAppointment = true;
+                break;
+        }
+        }
+
+        if(!hasAppointment){
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Upcoming Appointments");
+            alert.setHeaderText(null);
+            alert.setContentText("You have no upcoming appointments!");
+
+            alert.showAndWait();
+
+        }
+
+
+
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("main.fxml"));
         Parent root = loader.load();
@@ -63,7 +129,7 @@ public class Scheduler extends Application {
 
 
 
-        MainController controller = loader.getController();
+        controller = loader.getController();
         controller.setMainApp(this);
 
 
@@ -71,9 +137,7 @@ public class Scheduler extends Application {
 
 
 
-    Appointment appointment = new Appointment(3,LocalDateTime.now(),LocalDateTime.now().plusMinutes(10),new Customer(1,"test","test",1,3,"test","test"), new Contact(3,"test","test"),new User(3,"test","test"),"test","test","test","test");
-   //appointment.addToDB();
-  //  appointment.deleteFromDB();
+
     }
 
     public static class Appointment {
@@ -88,6 +152,7 @@ public class Scheduler extends Application {
         private StringProperty title = new SimpleStringProperty();
         private StringProperty description = new SimpleStringProperty();
         private StringProperty location = new SimpleStringProperty();
+        private ObjectProperty <LocalDateTime> startDateTime = new SimpleObjectProperty<LocalDateTime>();
 
         private StringProperty type = new SimpleStringProperty();
 
@@ -99,6 +164,7 @@ public class Scheduler extends Application {
             this.appointmentID.set(appointmentID);
             this.startTime.set(startTime.toLocalTime());
             this.endTime.set(endTime.toLocalTime());
+            this.startDateTime.set(startTime);
             customer.set(cus);
             contact.set(con);
             user.set(userIn);
@@ -113,7 +179,17 @@ public class Scheduler extends Application {
 
         }
 
+        public LocalDateTime getStartDateTime() {
+            return startDateTime.get();
+        }
 
+        public ObjectProperty<LocalDateTime> startDateTimeProperty() {
+            return startDateTime;
+        }
+
+        public void setStartDateTime(LocalDateTime startDateTime) {
+            this.startDateTime.set(startDateTime);
+        }
 
         public String getType() {
             return type.get();
@@ -494,6 +570,17 @@ public class Scheduler extends Application {
        public void setEndTime(LocalTime endTime) {
            this.endTime = endTime;
        }
+
+       public void deleteAllAppointments(){
+
+           for(Appointment a : appointments){
+               a.deleteFromDB();
+               a.deleteAppointment();
+           }
+
+       }
+
+
    }
 
     public class Contact extends Schedulable{
@@ -558,6 +645,11 @@ public class Scheduler extends Application {
             this.divisionID.set(divisionID);
             this.phone.set(phone);
             this.postalCode.set(postalCode);
+            this.firstLevelString.set(getDivisionName(divisionID));
+            this.countryString.set(countries.get(countryID));
+            System.out.println(divisionID + "Div ID");
+            System.out.println();
+            System.out.println(firstLevelStringProperty().get());
         }
 
         @Override
@@ -662,6 +754,55 @@ public class Scheduler extends Application {
         public void setPostalCode(String postalCode) {
             this.postalCode.set(postalCode);
         }
+
+        public void deleteFromDB(){
+
+            String deleteAppointment = "DELETE FROM customers WHERE Customer_ID =" + getID();
+            System.out.println(deleteAppointment);
+            try( Connection con = DriverManager.getConnection( "jdbc:mysql://wgudb.ucertify.com/WJ08HlC", "U08HlC", "53689288782" );) {
+
+                try(var statement = con.prepareStatement(deleteAppointment)) {
+                    statement.execute();
+                }
+
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+
+
+        }
+
+        public void addToDB(){
+
+
+            String deleteAppointment = "INSERT INTO customers(Customer_ID,Customer_Name,Postal_Code,Address,Phone,Division_ID,Last_Updated_By) Values(?,?,?,?,?,?,?)";
+
+            System.out.println(deleteAppointment);
+            try( Connection con = DriverManager.getConnection( "jdbc:mysql://wgudb.ucertify.com/WJ08HlC", "U08HlC", "53689288782" );) {
+
+                try(var statement = con.prepareStatement(deleteAppointment)) {
+                    statement.setInt(1,getID());
+                    statement.setString(2,getName());
+                    statement.setString(3,getPostalCode());
+                    statement.setString(4,getAddress());
+                    statement.setString(5,getPhone());
+                    statement.setInt(6,getDivisionID());
+                    statement.setString(7,user.getUsername());
+
+
+
+                    statement.executeUpdate();
+                }
+
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+
+
+        }
+
+
+
     }
 
     public class User extends Schedulable {
@@ -786,7 +927,7 @@ public class Scheduler extends Application {
             }
 
             //replace with login window later
-            user = users.get(0);
+
 
 
 
@@ -820,8 +961,8 @@ public class Scheduler extends Application {
 
 
                     Customer customer = new Customer(customerID,name,address,countryID,divisionID,phone,postalCode);
-                    customer.setCountryString(countries.get(customer.getCountryID()));
-                    customer.setFirstLevelString(firstLevelDivisions.get(customer.getDivisionID()));
+
+
                     customers.add(customer);
 
 
@@ -1055,6 +1196,117 @@ public class Scheduler extends Application {
       public void setFirstLevelID(int firstLevelID) {
           this.firstLevelID = firstLevelID;
       }
+  }
+
+  public Customer createCustomer(int customerID,String name,String address, int countryID,int divisionID, String phone, String postalCode){
+        Customer customer = new Customer(customerID,name,address,countryID,divisionID,phone,postalCode);
+        return customer;
+  }
+
+  public String getDivisionName(int divID){
+        String temp = "";
+        for(FirstLevelDivision d : divisions){
+            if(d.getFirstLevelID() == divID){
+              temp= d.getFirstLevelName();
+            }
+        }
+
+        return temp;
+  }
+
+  public FirstLevelDivision getDivision(int divID){
+        for(FirstLevelDivision d : divisions){
+            if (d.getFirstLevelID()== divID){
+                return d;
+            }
+        }
+
+        return null;
+
+  }
+
+  public void onCancelClicked(){
+
+       System.exit(0);
+  }
+  public void onLoginClicked(){
+        User u = userNameMatch(userName.getText());
+
+        String status = "Login failed";
+
+        if(u == null){
+
+            //insert username error
+
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle(resourceBundle.getString("warning"));
+            alert.setHeaderText(null);
+            alert.setContentText(resourceBundle.getString("incUN"));
+
+            alert.showAndWait();
+
+        }
+        else if(!passwordMatch(passwordField.getText(),u)){
+            //insert password error
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle(resourceBundle.getString("warning"));
+            alert.setHeaderText(null);
+            alert.setContentText(resourceBundle.getString("incPW"));
+
+            alert.showAndWait();
+        }
+        else{
+         user = u;
+        loginStage = (Stage) login.getScene().getWindow();
+        loginStage.close();
+        System.out.println("UN and PW CORRECT");
+        status = "Login Succeeded";
+        }
+      try(FileWriter fw = new FileWriter(" login_activity.txt",true);
+          BufferedWriter bw = new BufferedWriter(fw);
+          PrintWriter out = new PrintWriter(bw))
+      {
+          System.out.println("TRYING");
+          out.println("\nLogin Attempt:\n");
+          out.println("Username:" +userName.getText());
+          ZonedDateTime date = ZonedDateTime.of(LocalDateTime.now(),ZoneId.systemDefault());
+          out.println("Date and Time: " + date.toInstant().atZone(ZoneId.of("UTC")).toLocalDateTime());
+          out.println(status);
+
+
+
+      } catch (IOException e) {
+          e.printStackTrace();
+      }
+  }
+
+  User userNameMatch(String username){
+        System.out.println("UN Firing");
+        System.out.println(getUsers().size() + "HERE");
+        System.out.println(this.users);
+       User temp = null;
+        for(User u : users){
+            if(u.getUsername().equals(username)){
+                temp = u;
+                break;
+            }
+            }
+      return temp;
+        }
+
+
+
+
+  boolean passwordMatch(String password,User u){
+        System.out.println("PASSWORD  FIRING");
+        if(password.equals(u.getPassword())){
+            return true;
+        }
+        else {
+            return false;
+        }
+
+
   }
 
 
