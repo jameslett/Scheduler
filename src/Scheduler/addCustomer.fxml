@@ -15,7 +15,7 @@
    <bottom>
       <ButtonBar prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
         <buttons>
-          <Button mnemonicParsing="false" onAction="#onSaveClicked" text="Button" />
+          <Button mnemonicParsing="false" onAction="#onSaveClicked" text="Save" />
         </buttons>
       </ButtonBar>
    </bottom>

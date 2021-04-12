@@ -37,15 +37,10 @@ public class Scheduler extends Application {
 
     private static Stage loginStage = new Stage();
 
-    private static ResourceBundle resourceBundle;
+
     private static User user;
     private  MainController controller;
-    @FXML
-    private Button login = new Button();
-    @FXML
-    private TextField userName = new TextField();
-    @FXML
-    private PasswordField passwordField = new PasswordField();
+
 
     /**
      * The entry point of application.
@@ -57,7 +52,7 @@ public class Scheduler extends Application {
 
 
 
-        System.out.println(LocalTime.now().atOffset(ZoneOffset.UTC));
+
 
 
         launch(args);
@@ -72,20 +67,33 @@ public class Scheduler extends Application {
 
         boolean hasAppointment = false;
 
+
         Locale locale = Locale.getDefault();
-        resourceBundle= ResourceBundle.getBundle("login", locale);
+        ResourceBundle resources = ResourceBundle.getBundle("login", locale);
 
         FXMLLoader loader2 = new FXMLLoader(getClass().getResource("login.fxml"));
-        loader2.setResources(resourceBundle);
-        Parent root2 = loader2.load();
+        loader2.setResources(resources);
+
+        Parent root2 = null;
+        try {
+            root2 = loader2.load();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        LoginController loginCon = loader2.getController();
+        loginCon.SetMainApp(this);
 
 
-        loginStage.setTitle("Login" );
+        loginCon.setResourceBundle(resources);
+
+        loginCon.getZoneID().setText(loginCon.getResourceBundle().getString("timeZone") + " : " + ZoneId.systemDefault().toString() );
         loginStage.setScene(new Scene(root2));
-        System.out.println(this.users.size() + "Before Shw");
-        loginStage.initStyle(StageStyle.UNDECORATED);
+
+        loginStage.setOnCloseRequest(event -> event.consume());
+
         loginStage.showAndWait();
-        System.out.println(this.users.size() + "After Shw");
+
+
 
 
 
@@ -96,7 +104,7 @@ public class Scheduler extends Application {
 
 
         for(Appointment a : user.getAppointments()){
-            System.out.println(a.getStartTime().getMinute()-LocalTime.now().getMinute() <= 15);
+
             if (a.getStartTime().getHour() == LocalTime.now().getHour() &&
                     a.getStartTime().getMinute()-LocalTime.now().getMinute() <= 15 &&
             a.getDate().equals(LocalDate.now())&&
@@ -206,6 +214,11 @@ public class Scheduler extends Application {
 
         }
 
+        @Override
+        public String toString(){
+            String temp = "Apt ID: " + appointmentID.get()+ " "  +customer.getName() +" Start: "+ startTime.get() +" End: " +endTime.get() + "Date: " + date.get() +"\n";
+            return temp;
+        }
 
         /**
          * Gets start date time.
@@ -510,7 +523,7 @@ public class Scheduler extends Application {
         public void deleteFromDB(){
 
             String deleteAppointment = "DELETE FROM appointments WHERE Appointment_ID =" + appointmentID.get();
-            System.out.println(deleteAppointment);
+
             try( Connection con = DriverManager.getConnection( "jdbc:mysql://wgudb.ucertify.com/WJ08HlC", "U08HlC", "53689288782" );) {
 
                 try(var statement = con.prepareStatement(deleteAppointment)) {
@@ -532,7 +545,8 @@ public class Scheduler extends Application {
 
             String deleteAppointment = "INSERT INTO appointments(Appointment_ID,Title,Description,Location,Type,Start,End,Created_By,Customer_ID,User_ID,Contact_ID,Last_Updated_By) Values(?,?,?,?,?,?,?,?,?,?,?,?)";
 
-            System.out.println(deleteAppointment);
+
+
             try( Connection con = DriverManager.getConnection( "jdbc:mysql://wgudb.ucertify.com/WJ08HlC", "U08HlC", "53689288782" );) {
 
                 try(var statement = con.prepareStatement(deleteAppointment)) {
@@ -577,6 +591,22 @@ public class Scheduler extends Application {
          */
         public ObjectProperty<User> userProperty() {
             return user;
+        }
+
+        public ArrayList<LocalTime> getUnavailableTimes(){
+                ArrayList<LocalTime> temp = new ArrayList<>();
+            for(LocalTime time = startTime.get(); time.isBefore(endTime.get());time = time.plusMinutes(15) ){
+
+
+
+
+                  temp.add(time);
+
+
+
+            }
+            return temp;
+
         }
     }
 
@@ -640,7 +670,7 @@ public class Scheduler extends Application {
         public void deleteFromDB(){
 
            String deleteSchedulable = "DELETE FROM "+ this.getClass().getName().toLowerCase()+ "s WHERE " + this.getClass().getName().toLowerCase()+ "_ID=" + getID();
-           System.out.println(deleteSchedulable);
+
            try( Connection con = DriverManager.getConnection( "jdbc:mysql://wgudb.ucertify.com/WJ08HlC", "U08HlC", "53689288782" );) {
 
                try(var statement = con.prepareStatement(deleteSchedulable)) {
@@ -670,14 +700,21 @@ public class Scheduler extends Application {
            ArrayList<LocalTime> removeTimes= new ArrayList<LocalTime>();
            ArrayList<Appointment>appointments = new ArrayList<Appointment>();
            for(Schedulable p : parties){
+
+               System.out.println(p.getAppointmentsByDate(date) + " BY DATE "+date +"\n");
+
                for(Appointment a : p.getAppointmentsByDate(date)){
                    if(!appointments.contains(a)){
-                      if(exclude == null || a.getAppointmentID()!= exclude.getAppointmentID()){
-                       appointments.add(a);}
+                      if(exclude == null || a.getAppointmentID() != exclude.getAppointmentID()){
+                       appointments.add(a);
+                      removeTimes.addAll(a.getUnavailableTimes());
+                      }
                    }
 
                }
            }
+
+
 
            for(LocalTime time = startTime; time.isBefore(endTime);time = time.plusMinutes(15) ){
 
@@ -695,15 +732,9 @@ public class Scheduler extends Application {
 
            }
 
-                   for(LocalTime t : availTimes){
-                       //remove time if appointment conflicts
-                       for(Appointment a : appointments) {
-                           if ((t == a.getStartTime() || (t.isAfter(a.getStartTime()) && t.isBefore(a.getEndTime()))) && a.getDate().equals(date)) {
-                               removeTimes.add(t);
-                           }
-                       }
 
-           }
+
+
 
            for(LocalTime t : removeTimes){
                 availTimes.remove(t);
@@ -758,7 +789,7 @@ public class Scheduler extends Application {
 
            for(LocalTime time = start.plusMinutes(15); time.isBefore(tempEnd);time = time.plusMinutes(15) ){
                availTimes.add(time);
-               System.out.println(time);
+
 
            }
            availTimes.add(tempEnd);
@@ -794,7 +825,8 @@ public class Scheduler extends Application {
            }
 
 
-           return appointments;
+
+           return temp;
        }
 
 
@@ -876,6 +908,7 @@ public class Scheduler extends Application {
         public void deleteAllAppointments(){
 
            for(Appointment a : appointments){
+
                a.deleteFromDB();
                a.deleteAppointment();
            }
@@ -1863,108 +1896,8 @@ public class Scheduler extends Application {
 
   }
 
-    /**
-     * On cancel clicked. Closes the login Window
-     */
-    public void onCancelClicked(){
-
-       System.exit(0);
-  }
-
-    /**
-     * On login clicked.
-     * Checks username and password and logs to file
-     */
-    public void onLoginClicked(){
-        User u = userNameMatch(userName.getText());
-
-        String status = "Login failed";
-
-        if(u == null){
-
-            //insert username error
-
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle(resourceBundle.getString("warning"));
-            alert.setHeaderText(null);
-            alert.setContentText(resourceBundle.getString("incUN"));
-
-            alert.showAndWait();
-
-        }
-        else if(!passwordMatch(passwordField.getText(),u)){
-            //insert password error
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle(resourceBundle.getString("warning"));
-            alert.setHeaderText(null);
-            alert.setContentText(resourceBundle.getString("incPW"));
-
-            alert.showAndWait();
-        }
-        else{
-         user = u;
-        loginStage = (Stage) login.getScene().getWindow();
-        loginStage.close();
-        System.out.println("UN and PW CORRECT");
-        status = "Login Succeeded";
-        }
-      try(FileWriter fw = new FileWriter(" login_activity.txt",true);
-          BufferedWriter bw = new BufferedWriter(fw);
-          PrintWriter out = new PrintWriter(bw))
-      {
-          System.out.println("TRYING");
-          out.println("\nLogin Attempt:\n");
-          out.println("Username:" +userName.getText());
-          ZonedDateTime date = ZonedDateTime.of(LocalDateTime.now(),ZoneId.systemDefault());
-          out.println("Date and Time: " + date.toInstant().atZone(ZoneId.of("UTC")).toLocalDateTime());
-          out.println(status);
 
 
-
-      } catch (IOException e) {
-          e.printStackTrace();
-      }
-  }
-
-    /**
-     * User name match user.
-     *
-     * @param username the username
-     * @return the user
-     */
-    User userNameMatch(String username){
-        System.out.println("UN Firing");
-        System.out.println(getUsers().size() + "HERE");
-        System.out.println(this.users);
-       User temp = null;
-        for(User u : users){
-            if(u.getUsername().equals(username)){
-                temp = u;
-                break;
-            }
-            }
-      return temp;
-        }
-
-
-    /**
-     * Password match boolean.
-     *
-     * @param password the password
-     * @param u        the u
-     * @return the boolean
-     */
-    boolean passwordMatch(String password,User u){
-        System.out.println("PASSWORD  FIRING");
-        if(password.equals(u.getPassword())){
-            return true;
-        }
-        else {
-            return false;
-        }
-
-
-  }
 
 
 }

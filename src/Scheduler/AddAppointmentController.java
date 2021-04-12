@@ -103,7 +103,7 @@ public class AddAppointmentController {
             else{
                 today = LocalDate.now();
             }
-            setDisable(bool || (date.compareTo(today) < 0  || date.getDayOfWeek() == DayOfWeek.SATURDAY ) );
+            setDisable(bool || (date.compareTo(today) < 0));
 
 
         }
@@ -456,7 +456,6 @@ public class AddAppointmentController {
 
 
         appointmentEndTimeComboBox.setDisable(false);
-        System.out.println(startTime + "THIS ONE");
         appointmentEndTimeComboBox.setItems(selectedUser.GetAvailableEndTimes(getPartyArrayList(),startTime,selectedDate, controller.getSelectedAppointment()));
         appointmentEndTimeComboBox.getSelectionModel().select(0);}
     }

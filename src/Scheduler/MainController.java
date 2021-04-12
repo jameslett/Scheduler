@@ -302,9 +302,15 @@ public class MainController {
             Optional<ButtonType> result = alert.showAndWait();
             if (result.get() == ButtonType.YES){
 
-                selectedCustomer.deleteAllAppointments();
 
+                for(Scheduler.Appointment a : selectedCustomer.getAppointments()){
+                    appointmentObservableList.remove(a);
+                }
+
+                selectedCustomer.deleteAllAppointments();
                 selectedCustomer.deleteFromDB();
+
+
                 scheduler.getCustomers().remove(selectedCustomer);
                 selectedCustomer = null;
                 Alert alert2 = new Alert(Alert.AlertType.INFORMATION);
